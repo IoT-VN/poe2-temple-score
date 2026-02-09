@@ -4,21 +4,49 @@
   "description": "MCP Server for analyzing PoE2 Vaal Temple layouts and calculating star ratings",
   "author": "Sulo",
   "license": "MIT",
-  "keywords": ["path-of-exile-2", "vaal-temple", "temple-analysis", "rating"],
+  "keywords": [
+    "path-of-exile-2",
+    "vaal-temple",
+    "temple-analysis",
+    "rating"
+  ],
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc",
     "start": "node dist/index.js",
-    "dev": "ts-node src/index.ts"
+    "dev": "ts-node src/index.ts",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "lint": "eslint src/**/*.ts",
+    "lint:fix": "eslint src/**/*.ts --fix",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "format:check": "prettier --check \"src/**/*.ts\"",
+    "prepare": "cd .. && husky poe2-temple-analyzer/.husky"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.0",
     "lz-string": "^1.5.0"
   },
   "devDependencies": {
+    "@types/jest": "^29.5.0",
     "@types/node": "^20.0.0",
-    "typescript": "^5.0.0",
-    "ts-node": "^10.9.0"
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "eslint": "^8.50.0",
+    "globals": "^14.0.0",
+    "husky": "^9.0.0",
+    "jest": "^29.7.0",
+    "lint-staged": "^15.0.0",
+    "prettier": "^3.0.0",
+    "ts-jest": "^29.1.0",
+    "ts-node": "^10.9.0",
+    "typescript": "^5.0.0"
+  },
+  "lint-staged": {
+    "*.ts": [
+      "eslint --fix",
+      "prettier --write"
+    ]
   }
 }
-

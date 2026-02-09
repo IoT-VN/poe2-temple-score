@@ -1,0 +1,8 @@
+# Global code owners
+* @IoT-VN
+
+# MCP Server specific
+/poe2-temple-analyzer/ @IoT-VN
+
+# GitHub configuration
+/.github/ @IoT-VN

@@ -1,7 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.decodeTempleData = decodeTempleData;
+exports.extractShareData = extractShareData;
 exports.analyzeTemple = analyzeTemple;
-const mcp_js_1 = require("@modelcontextprotocol/sdk/server/mcp.js");
+const index_js_1 = require("@modelcontextprotocol/sdk/server/index.js");
 const stdio_js_1 = require("@modelcontextprotocol/sdk/server/stdio.js");
 const types_js_1 = require("@modelcontextprotocol/sdk/types.js");
 // Multiple charset versions for compatibility
@@ -95,6 +97,7 @@ function decodeTempleData(encoded) {
         if (!encoded)
             return null;
         // Generate all possible charsets by combining known patterns
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const baseChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
         const uniqueChars = [...new Set(encoded)].sort().join('');
         // Try auto-detected charset first (from unique chars in the string)
@@ -206,6 +209,7 @@ function extractShareData(shareUrl) {
 /**
  * Parse temple data from array format (common in PoE2 temple builders)
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
 function parseTempleArray(data) {
     const grid = {};
     if (Array.isArray(data)) {
@@ -224,12 +228,14 @@ function parseTempleArray(data) {
 /**
  * Calculate distance between two points
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function calculateDistance(x1, y1, x2, y2) {
     return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
 }
 /**
  * Check if a path is a straight line
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function isStraightLine(path) {
     if (path.length < 2)
         return false;
@@ -250,6 +256,7 @@ function isStraightLine(path) {
 /**
  * Find path using BFS
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function findPath(grid, start, end) {
     const visited = new Set();
     const queue = [];
@@ -335,7 +342,8 @@ function analyzeTemple(templeData) {
             visited.add(key);
             let current = startRoom;
             // Extend chain forward
-            while (true) {
+            let extending = true;
+            while (extending) {
                 let bestNext = null;
                 let bestDist = 999;
                 rooms.forEach(r => {
@@ -352,8 +360,9 @@ function analyzeTemple(templeData) {
                     visited.add(bestNext.y + ',' + bestNext.x);
                     current = bestNext;
                 }
-                else
-                    break;
+                else {
+                    extending = false;
+                }
             }
             if (chain.length > bestChain.length)
                 bestChain = chain;
@@ -363,9 +372,13 @@ function analyzeTemple(templeData) {
     const bestChain = findBestChain(rewardRooms);
     // Calculate metrics
     const chainLength = bestChain.length;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const chainTierSum = bestChain.reduce((sum, r) => sum + (r.tier || 0), 0);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const chainAvgTier = chainLength > 0 ? chainTierSum / chainLength : 0;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const chainRaritySum = bestChain.reduce((sum, r) => sum + (ROOM_RARITY[r.room] || 0), 0);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const highTierRooms = rewardRooms.filter(r => (r.tier || 0) >= 6).length;
     // ==========================================
     // NEW BALANCED SCORING (Snake + Room Quality + Density)
@@ -466,12 +479,11 @@ function analyzeTemple(templeData) {
     };
 }
 // Create MCP Server
-const server = new mcp_js_1.McpServer({
+const server = new index_js_1.Server({
     name: "poe2-temple-analyzer",
     version: "1.0.0",
 }, {
     capabilities: {
-        resources: {},
         tools: {},
     },
 });
