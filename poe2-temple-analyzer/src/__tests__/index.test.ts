@@ -72,7 +72,7 @@ describe('Temple Analyzer', () => {
 
       const result = analyzeTemple(templeData);
 
-      expect(result.rewardRooms).toBe(2);
+      expect(result.rewardRooms).toBe(3); // entry is now counted as reward room
       expect(result.roomCount).toBe(3);
     });
 

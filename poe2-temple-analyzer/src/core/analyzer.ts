@@ -10,6 +10,11 @@ import { analyzeTechPatterns } from './tech-detector';
  * Room rarity for snake scoring
  */
 const ROOM_RARITY: { [key: string]: number } = {
+  // T7 Special rooms (highest priority)
+  corruption: 12,
+  sacrifice: 10,
+
+  // Top reward rooms
   viper_spymaster: 10,
   golem_works: 9,
   viper_legion_barracks: 8,
@@ -17,14 +22,29 @@ const ROOM_RARITY: { [key: string]: number } = {
   vault: 6,
   reward_currency: 5,
   reward_room: 5,
+
+  // Good reward rooms
   alchemy_lab: 4,
   flesh_surgeon: 4,
   synthflesh: 4,
+
+  // Architect rooms (valuable for placement)
+  entry: 5,
+  commander: 5,
+  architect: 3,
+
+  // Standard reward rooms
   thaumaturge: 3,
   smithy: 3,
   armoury: 2,
   generator: 2,
   garrison: 2,
+
+  // Special rooms
+  sacrificial_chamber: 2,
+  altar_of_sacrifice: 1,
+  boss: 8,
+  atziri: 15,
 };
 
 // Create cache instance (100 temples)
@@ -123,12 +143,11 @@ function findBestChain(rooms: Room[]): Room[] {
  * Calculate snake score based on chain length
  */
 function calculateSnakeScore(chainLength: number): number {
-  if (chainLength >= 8) return 40;
-  if (chainLength >= 6) return 35;
-  if (chainLength >= 5) return 30;
-  if (chainLength >= 4) return 25;
-  if (chainLength >= 3) return 15;
-  if (chainLength >= 2) return 6;
+  // Capped at 20 instead of 40 - less influence
+  if (chainLength >= 8) return 20;
+  if (chainLength >= 6) return 15;
+  if (chainLength >= 4) return 10;
+  if (chainLength >= 2) return 5;
   return 2;
 }
 
@@ -142,14 +161,15 @@ function calculateRoomScore(rewardRooms: Room[]): { score: number; metrics: Room
   const t6Rooms = rewardRooms.filter((r) => (r.tier || 0) === 6).length;
 
   let roomScore = 0;
-  roomScore += spymasters * 10;
-  roomScore += golems * 8;
-  roomScore += t7Rooms * 30;
-  roomScore += Math.min(15, t6Rooms * 3);
+  // Reduced weights
+  roomScore += t7Rooms * 12; // key differentiator
+  roomScore += spymasters * 5; // reduced
+  roomScore += golems * 4; // reduced
+  roomScore += Math.min(8, t6Rooms * 1.5); // reduced
 
-  // Bonus for MANY T6+ rooms
+  // High-tier density bonus (only if lots of T6+)
   const highTierCount = rewardRooms.filter((r) => (r.tier || 0) >= 6).length;
-  if (highTierCount >= 5) roomScore += 10;
+  if (highTierCount >= 6) roomScore += 3; // requires 6+ T6
 
   return {
     score: roomScore,
@@ -175,23 +195,17 @@ interface RoomMetrics {
  * Calculate star rating and description
  */
 function calculateStarRating(totalScore: number): { rating: number; description: string } {
-  if (totalScore >= 90) {
+  if (totalScore >= 45) {
     return { rating: 5, description: 'God Tier - Exceptional temple with outstanding quality' };
   }
-  if (totalScore >= 75) {
-    return { rating: 4.5, description: 'Excellent - Very strong layout with high-value rooms' };
+  if (totalScore >= 32) {
+    return { rating: 4, description: 'Excellent - Very strong layout with high-value rooms' };
   }
-  if (totalScore >= 50) {
-    return { rating: 4, description: 'Very Good - Strong snake chain and good rewards' };
+  if (totalScore >= 22) {
+    return { rating: 3, description: 'Good - Solid optimization with valuable rooms' };
   }
-  if (totalScore >= 40) {
-    return { rating: 3.5, description: 'Good - Decent snake chain with valuable rooms' };
-  }
-  if (totalScore >= 25) {
-    return { rating: 3, description: 'Average - Basic optimization with some value' };
-  }
-  if (totalScore >= 18) {
-    return { rating: 2, description: 'Below Average - Weak snake chain, limited rewards' };
+  if (totalScore >= 12) {
+    return { rating: 2, description: 'Average - Basic optimization with some value' };
   }
   return { rating: 1, description: 'Poor - Broken snake chain, no optimization' };
 }
@@ -262,7 +276,19 @@ export function analyzeTemple(templeData: TempleData): TempleAnalysis {
   const snakeScore = calculateSnakeScore(chainLength);
 
   const { score: roomScore, metrics } = calculateRoomScore(rewardRooms);
-  const quantityScore = Math.min(15, rewardRooms.length * 0.8);
+
+  // Quantity score - penalize low density
+  const rewardDensity = rewardRooms.length / rooms.length;
+  let quantityScore;
+  if (rewardDensity >= 0.8) {
+    quantityScore = 15; // 80%+ reward rooms
+  } else if (rewardDensity >= 0.6) {
+    quantityScore = 10; // 60-79% reward rooms
+  } else if (rewardDensity >= 0.5) {
+    quantityScore = 5; // 50-59% reward rooms
+  } else {
+    quantityScore = 2; // <50% reward rooms (poor)
+  }
 
   // Tech pattern analysis
   const techAnalysis = analyzeTechPatterns(templeData);
