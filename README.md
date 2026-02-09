@@ -38,12 +38,24 @@ npx serve .
 - **Tech Detection**: Identify Russian Tech, Roman Road, and other patterns
 - **Reward Analysis**: Calculate reward density and room distribution
 - **Suggestions**: Get improvement recommendations
+- **MCP Integration**: Use directly in Claude Desktop
+- **Modular Architecture**: Clean, maintainable codebase
+- **93% Test Coverage**: Comprehensive test suite
 
 ## Documentation
 
+### User Documentation
+- [CHANGELOG.md](CHANGELOG.md) - Version history and changes
+- [TROUBLESHOOTING.md](TROUBLESHOOTING.md) - FAQ and common issues
+
+### Developer Documentation
 - [AGENTS.md](AGENTS.md) - Development guide for AI agents
-- [Architecture](docs/architecture.md) - System architecture and design
-- [MCP Server README](poe2-temple-analyzer/README.md) - Detailed MCP server documentation
+- [docs/api-reference.md](docs/api-reference.md) - MCP server API documentation
+- [MCP Server README](poe2-temple-analyzer/README.md) - MCP server details
+
+### Project Documentation
+- [CONTRIBUTING.md](CONTRIBUTING.md) - Contribution guidelines
+- [LICENSE](LICENSE) - MIT License details
 
 ## Development
 
