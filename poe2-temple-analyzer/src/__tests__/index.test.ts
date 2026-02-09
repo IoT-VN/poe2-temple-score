@@ -1,5 +1,5 @@
 import { analyzeTemple, decodeTempleData, extractShareData } from '../index';
-import type { TempleData } from '../index';
+import type { TempleData } from '../types/temple-types';
 
 describe('Temple Analyzer', () => {
   describe('extractShareData', () => {
