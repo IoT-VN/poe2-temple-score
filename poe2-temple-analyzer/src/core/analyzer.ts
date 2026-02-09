@@ -190,7 +190,7 @@ function calculateStarRating(totalScore: number): { rating: number; description:
   if (totalScore >= 25) {
     return { rating: 3, description: 'Average - Basic optimization with some value' };
   }
-  if (totalScore >= 15) {
+  if (totalScore >= 18) {
     return { rating: 2, description: 'Below Average - Weak snake chain, limited rewards' };
   }
   return { rating: 1, description: 'Poor - Broken snake chain, no optimization' };

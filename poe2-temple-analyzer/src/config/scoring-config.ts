@@ -11,7 +11,7 @@ export const RATING_THRESHOLDS: RatingThresholds = {
   fiveStar: 90,
   fourStar: 50,
   threeStar: 25,
-  twoStar: 15,
+  twoStar: 18,
   oneStar: 0,
 };
 

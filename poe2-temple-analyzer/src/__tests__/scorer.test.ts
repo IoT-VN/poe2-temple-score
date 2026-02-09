@@ -49,7 +49,7 @@ describe('Scorer', () => {
     });
 
     it('should return 2 stars for fair score', () => {
-      expect(calculateStarRating(20)).toBe(2);
+      expect(calculateStarRating(18)).toBe(2);
     });
 
     it('should return 1 star for poor score', () => {
@@ -61,6 +61,8 @@ describe('Scorer', () => {
       expect(calculateStarRating(89)).toBe(4);
       expect(calculateStarRating(50)).toBe(4);
       expect(calculateStarRating(49)).toBe(3);
+      expect(calculateStarRating(18)).toBe(2);
+      expect(calculateStarRating(17)).toBe(1);
     });
   });
 
