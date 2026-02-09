@@ -1,0 +1,24 @@
+{
+  "name": "poe2-temple-analyzer",
+  "version": "1.0.0",
+  "description": "MCP Server for analyzing PoE2 Vaal Temple layouts and calculating star ratings",
+  "author": "Sulo",
+  "license": "MIT",
+  "keywords": ["path-of-exile-2", "vaal-temple", "temple-analysis", "rating"],
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node src/index.ts"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "lz-string": "^1.5.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0",
+    "ts-node": "^10.9.0"
+  }
+}
+

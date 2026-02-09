@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sulo - PoE2 Temple Rating</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --bg-dark: #141414;
+            --bg-panel: #1e1e1e;
+            --bg-cell: #252525;
+            --bg-hover: #2a2a2a;
+            --border: #333;
+            --gold: #a08050;
+            --gold-light: #c9a860;
+            --green: #4ade80;
+            --blue: #60a5fa;
+            --red: #f87171;
+            --purple: #c084fc;
+            --cyan: #22d3ee;
+            --text: #d4d4d4;
+            --text-muted: #888;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 20px;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            color: var(--gold);
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            color: var(--text-muted);
+        }
+        
+        .input-section {
+            background: var(--bg-panel);
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 1px solid var(--border);
+        }
+        
+        .input-section label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: var(--gold-light);
+        }
+        
+        .input-section textarea {
+            width: 100%;
+            height: 100px;
+            background: var(--bg-cell);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 15px;
+            color: var(--text);
+            font-family: monospace;
+            font-size: 14px;
+            resize: vertical;
+        }
+        
+        .input-section textarea:focus {
+            outline: none;
+            border-color: var(--gold);
+        }
+        
+        .analyze-btn {
+            width: 100%;
+            margin-top: 15px;
+            padding: 15px;
+            background: linear-gradient(135deg, var(--gold), #8b6914);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .analyze-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(160, 128, 80, 0.3);
+        }
+        
+        .analyze-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .result-section {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .result-section.visible {
+            display: block;
+        }
+        
+        .rating-card {
+            background: var(--bg-panel);
+            border-radius: 16px;
+            padding: 40px;
+            border: 1px solid var(--border);
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .stars {
+            font-size: 64px;
+            margin: 20px 0;
+            letter-spacing: 8px;
+        }
+        
+        .star {
+            color: var(--border);
+            cursor: default;
+        }
+        
+        .star.filled {
+            color: var(--gold);
+            text-shadow: 0 0 20px rgba(201, 168, 96, 0.5);
+        }
+        
+        .star.half {
+            background: linear-gradient(90deg, var(--gold) 50%, var(--border) 50%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .rating-title {
+            font-size: 1.8rem;
+            color: var(--gold-light);
+            margin-bottom: 10px;
+        }
+        
+        .rating-description {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            margin-bottom: 30px;
+        }
+        
+        .score-display {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 1px solid var(--border);
+        }
+        
+        .score-item {
+            text-align: center;
+        }
+        
+        .score-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--gold);
+        }
+        
+        .score-label {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-top: 5px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            background: var(--bg-cell);
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--blue);
+        }
+        
+        .stat-value.green { color: var(--green); }
+        .stat-value.purple { color: var(--purple); }
+        .stat-value.cyan { color: var(--cyan); }
+        
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: 5px;
+        }
+        
+        .tech-badges {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        
+        .tech-badge {
+            background: var(--bg-cell);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 8px 16px;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+        
+        .tech-badge.active {
+            background: rgba(160, 128, 80, 0.2);
+            border-color: var(--gold);
+            color: var(--gold-light);
+        }
+        
+        .suggestions {
+            background: var(--bg-panel);
+            border-radius: 12px;
+            padding: 25px;
+            border: 1px solid var(--border);
+        }
+        
+        .suggestions h3 {
+            color: var(--cyan);
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+        
+        .suggestions ul {
+            list-style: none;
+        }
+        
+        .suggestions li {
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .suggestions li:last-child {
+            border-bottom: none;
+        }
+        
+        .suggestions li::before {
+            content: "→";
+            color: var(--cyan);
+        }
+        
+        .criteria-section {
+            background: var(--bg-panel);
+            border-radius: 12px;
+            padding: 25px;
+            border: 1px solid var(--border);
+            margin-top: 20px;
+        }
+        
+        .criteria-section h3 {
+            color: var(--gold-light);
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+        }
+        
+        .criteria-item {
+            background: var(--bg-cell);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+        }
+        
+        .criteria-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .criteria-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        
+        .criteria-name {
+            font-weight: 600;
+            color: var(--text);
+        }
+        
+        .criteria-points {
+            color: var(--gold);
+            font-weight: 600;
+        }
+        
+        .criteria-desc {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+        
+        .progress-bar {
+            height: 6px;
+            background: var(--bg-dark);
+            border-radius: 3px;
+            margin-top: 10px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--gold), var(--gold-light));
+            border-radius: 3px;
+            transition: width 0.5s ease;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+        
+        .loading.visible {
+            display: block;
+        }
+        
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid var(--border);
+            border-top-color: var(--gold);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .error-message {
+            background: rgba(248, 113, 113, 0.1);
+            border: 1px solid var(--red);
+            border-radius: 8px;
+            padding: 15px;
+            color: var(--red);
+            margin-top: 15px;
+            display: none;
+        }
+        
+        .error-message.visible {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏛️ PoE2 Temple Rating</h1>
+            <p>Analyze your Vaal Temple layout and get instant star rating</p>
+        </div>
+        
+        <div class="input-section">
+            <label>Paste your Temple Share URL</label>
+            <textarea id="shareUrl" placeholder="http://127.0.0.1:8080/#/atziri-temple?t=AEghSCFIIjFoMSF6cHpwaTESEkhwc..."></textarea>
+            <button class="analyze-btn" onclick="analyzeTemple()">Analyze & Rate</button>
+            <div class="error-message" id="errorMessage"></div>
+        </div>
+        
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Analyzing temple layout...</p>
+        </div>
+        
+        <div class="result-section" id="resultSection">
+            <div class="rating-card">
+                <div class="stars" id="stars"></div>
+                <h2 class="rating-title" id="ratingTitle"></h2>
+                <p class="rating-description" id="ratingDescription"></p>
+                
+                <div class="score-display">
+                    <div class="score-item">
+                        <div class="score-value" id="totalScore">0</div>
+                        <div class="score-label">Total Score</div>
+                    </div>
+                    <div class="score-item">
+                        <div class="score-value" id="rewardScore">0</div>
+                        <div class="score-label">Reward Score</div>
+                    </div>
+                    <div class="score-item">
+                        <div class="score-value" id="techScore">0</div>
+                        <div class="score-label">Tech Score</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="roomCount">0</div>
+                    <div class="stat-label">Total Rooms</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value green" id="rewardRooms">0</div>
+                    <div class="stat-label">Reward Rooms</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value purple" id="architectRooms">0</div>
+                    <div class="stat-label">Architects</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value cyan" id="rewardDensity">0%</div>
+                    <div class="stat-label">Reward Density</div>
+                </div>
+            </div>
+            
+            <div class="tech-badges" id="techBadges"></div>
+            
+            <div class="suggestions" id="suggestionsSection" style="display: none;">
+                <h3>💡 Improvement Suggestions</h3>
+                <ul id="suggestionsList"></ul>
+            </div>
+            
+            <div class="criteria-section">
+                <h3>📊 Rating Criteria</h3>
+                <div class="criteria-item">
+                    <div class="criteria-header">
+                        <span class="criteria-name">Snake Score</span>
+                        <span class="criteria-points">0-40 points</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="rewardProgress" style="width: 0%"></div>
+                    </div>
+                    <div class="criteria-desc">Based on snake chain length (8+ rooms = 40pts)</div>
+                </div>
+                <div class="criteria-item">
+                    <div class="criteria-header">
+                        <span class="criteria-name">Room Quality</span>
+                        <span class="criteria-points">0-50 points</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="techProgress" style="width: 0%"></div>
+                    </div>
+                    <div class="criteria-desc">Spymaster (10pts) + Golem (8pts) + T7 Room (30pts) + T6 Room (3pts)</div>
+                </div>
+                <div class="criteria-item">
+                    <div class="criteria-header">
+                        <span class="criteria-name">Quantity Score</span>
+                        <span class="criteria-points">0-15 points</span>
+                    </div>
+                    <div class="criteria-desc">Based on total reward rooms (18+ rooms = 15pts)</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Multiple charset versions for compatibility
+        const CHARSETS = [
+            // Base-40 charset with 467 (newest)
+            '467ABCDEFHIJKMOPQRSTUWXYaghijklmnopuwxy',
+            // Base-32 charset
+            'ABCDEFHIJKMOQRSTWXYaceghijkopqwx',
+            // Base-40 newest charset (2026)
+            '056ABCEFGIJKMQSTWXYaceghijklnopqrwxy',
+            // Base-40 newer charset
+            '56ABCDEFGIJKMOQRSUWXYaceghjklpwxy',
+            // Base-40 old charset (legacy)
+            '56ABCDEFGHIKMQRSTWYaceghjklnopwxy'
+        ];
+
+        // Room type ID to name mapping (based on PoE2 temple)
+        const ROOM_TYPE_IDS = {
+            0: 'empty',
+            1: 'path',
+            2: 'entry',
+            3: 'boss',
+            4: 'corruption',
+            5: 'sacrifice',
+            6: 'alchemy_lab',
+            7: 'armoury',
+            8: 'flesh_surgeon',
+            9: 'garrison',
+            10: 'generator',
+            11: 'golem_works',
+            12: 'reward_currency',
+            13: 'smithy',
+            14: 'synthflesh',
+            15: 'thaumaturge',
+            16: 'transcendent_barracks',
+            17: 'vault',
+            18: 'viper_legion_barracks',
+            19: 'viper_spymaster',
+            20: 'commander',
+            21: 'architect',
+            22: 'altar_of_sacrifice',
+            23: 'sacrificial_chamber',
+            24: 'reward_room',
+            25: 'medallion_bonus',
+            26: 'medallion_reroll',
+            27: 'medallion_levelup',
+            28: 'medallion_increase_max',
+            29: 'medallion_prevent_delete',
+            30: 'medallion_increase_tokens',
+            31: 'unknown'
+        };
+
+        // Room type definitions with reward values and quality tiers
+        const ROOM_TYPES = {
+            // High Value Rooms (4 points)
+            'reward_currency': { type: 'reward', baseValue: 4, highTierBonus: true },
+            'vault': { type: 'reward', baseValue: 4, highTierBonus: true },
+
+            // Medium-High Value Rooms (3 points)
+            'alchemy_lab': { type: 'reward', baseValue: 3, highTierBonus: true },
+            'flesh_surgeon': { type: 'reward', baseValue: 3, highTierBonus: true },
+            'synthflesh': { type: 'reward', baseValue: 3, highTierBonus: true },
+            'viper_spymaster': { type: 'reward', baseValue: 3, highTierBonus: true },
+            'reward_room': { type: 'reward', baseValue: 3, highTierBonus: true },
+
+            // Medium Value Rooms (2 points)
+            'armoury': { type: 'reward', baseValue: 2, highTierBonus: true },
+            'garrison': { type: 'reward', baseValue: 2, highTierBonus: true },
+            'generator': { type: 'reward', baseValue: 2, highTierBonus: true },
+            'golem_works': { type: 'reward', baseValue: 2, highTierBonus: true },
+            'smithy': { type: 'reward', baseValue: 2, highTierBonus: true },
+            'thaumaturge': { type: 'reward', baseValue: 2, highTierBonus: true },
+            'transcendent_barracks': { type: 'reward', baseValue: 2, highTierBonus: true },
+            'viper_legion_barracks': { type: 'reward', baseValue: 2, highTierBonus: true },
+
+            // Special Rooms
+            'corruption': { type: 'special', baseValue: 1, highTierBonus: false },
+            'sacrifice_room': { type: 'special', baseValue: 0, highTierBonus: false },
+            'sacrificial_chamber': { type: 'special', baseValue: 0, highTierBonus: false },
+
+            // Architect
+            'commander': { type: 'architect', baseValue: 0, highTierBonus: false },
+            'architect': { type: 'architect', baseValue: 0, highTierBonus: false },
+
+            // Boss
+            'atziri': { type: 'boss', baseValue: 0, highTierBonus: false },
+            'boss': { type: 'boss', baseValue: 0, highTierBonus: false },
+
+            // Empty/Path
+            'empty': { type: 'empty', baseValue: 0, highTierBonus: false },
+            'path': { type: 'path', baseValue: 0, highTierBonus: false },
+
+            // Medallion rooms
+            'medallion_bonus': { type: 'special', baseValue: 0, highTierBonus: false },
+            'medallion_reroll': { type: 'special', baseValue: 0, highTierBonus: false },
+            'medallion_levelup': { type: 'special', baseValue: 0, highTierBonus: false },
+            'medallion_increase_max': { type: 'special', baseValue: 0, highTierBonus: false },
+            'medallion_prevent_delete': { type: 'special', baseValue: 0, highTierBonus: false },
+            'medallion_increase_tokens': { type: 'special', baseValue: 0, highTierBonus: false },
+
+            // Unknown
+            'unknown': { type: 'unknown', baseValue: 1, highTierBonus: false },
+        };
+
+        function extractShareData(shareUrl) {
+            try {
+                const url = new URL(shareUrl);
+                const hash = url.hash;
+                const tParamMatch = hash.match(/\?t=([^&]+)/);
+                if (tParamMatch) {
+                    return tParamMatch[1];
+                }
+                return null;
+            } catch {
+                return null;
+            }
+        }
+
+        function decodeTempleData(encoded) {
+            if (!encoded) return null;
+
+            try {
+                // Auto-detect charset from encoded string
+                const uniqueChars = [...new Set(encoded)].sort().join('');
+                const charToVal = {};
+                uniqueChars.split('').forEach((c, i) => charToVal[c] = i);
+                const values = encoded.split('').map(c => charToVal[c]);
+
+                // Check if valid 5-bit encoding (max value <= 31)
+                if (!values.some(v => v === undefined) && Math.max(...values) <= 31) {
+                    let bitString = '';
+                    values.forEach(v => bitString += v.toString(2).padStart(5, '0'));
+
+                    const rooms = [];
+                    let pos = 0;
+
+                    while (pos + 16 <= bitString.length) {
+                        const x = parseInt(bitString.substring(pos, pos + 4), 2);
+                        const y = parseInt(bitString.substring(pos + 4, pos + 8), 2);
+                        const roomTypeId = parseInt(bitString.substring(pos + 8, pos + 13), 2);
+                        const tier = parseInt(bitString.substring(pos + 13, pos + 16), 2);
+                        pos += 16;
+
+                        if (x < 16 && y < 16 && roomTypeId <= 31) {
+                            const roomName = ROOM_TYPE_IDS[roomTypeId] || 'unknown_' + roomTypeId;
+                            rooms.push({ x, y, room: roomName, tier, roomTypeId });
+                        }
+                    }
+
+                    if (rooms.length > 5) {
+                        console.log('Auto-detected charset with', uniqueChars.length, 'characters,', rooms.length, 'rooms');
+                        return { rooms };
+                    }
+                }
+
+                // Fall back to known charsets
+                for (const charset of CHARSETS) {
+                    const map = {};
+                    charset.split('').forEach((c, i) => map[c] = i);
+                    const charsetValues = encoded.split('').map(c => map[c]);
+
+                    if (charsetValues.some(v => v === undefined)) continue;
+
+                    let bitString = '';
+                    charsetValues.forEach(v => bitString += v.toString(2).padStart(5, '0'));
+
+                    const rooms = [];
+                    let pos = 0;
+
+                    while (pos + 16 <= bitString.length) {
+                        const x = parseInt(bitString.substring(pos, pos + 4), 2);
+                        const y = parseInt(bitString.substring(pos + 4, pos + 8), 2);
+                        const roomTypeId = parseInt(bitString.substring(pos + 8, pos + 13), 2);
+                        const tier = parseInt(bitString.substring(pos + 13, pos + 16), 2);
+                        pos += 16;
+
+                        if (x < 16 && y < 16 && roomTypeId <= 31) {
+                            const roomName = ROOM_TYPE_IDS[roomTypeId] || 'unknown_' + roomTypeId;
+                            rooms.push({ x, y, room: roomName, tier, roomTypeId });
+                        }
+                    }
+
+                    if (rooms.length > 5) {
+                        return { rooms };
+                    }
+                }
+
+                throw new Error('Could not decode temple data');
+            } catch (error) {
+                console.error('Error decoding temple data:', error);
+                return null;
+            }
+        }
+        
+        function analyzeTempleData(templeData) {
+            const allRooms = templeData.rooms || [];
+
+            // Room rarity for snake scoring (higher = better for chain)
+            const ROOM_RARITY = {
+                'viper_spymaster': 10,
+                'golem_works': 9,
+                'viper_legion_barracks': 8,
+                'transcendent_barracks': 7,
+                'vault': 6,
+                'reward_currency': 5,
+                'reward_room': 5,
+                'alchemy_lab': 4,
+                'flesh_surgeon': 4,
+                'synthflesh': 4,
+                'thaumaturge': 3,
+                'smithy': 3,
+                'armoury': 2,
+                'generator': 2,
+                'garrison': 2,
+            };
+
+            // REWARD ROOM type IDs (actual reward rooms that count for snake)
+            const REWARD_TYPE_IDS = new Set([
+                6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 24
+            ]);
+
+            // Handle stacked rooms: keep the BEST room at each position
+            // (best = highest tier for same room type, or higher rarity room type)
+            const positionMap = {};
+
+            allRooms.forEach(room => {
+                if (room.room === 'empty' || room.room === 'path') return;
+                if (!REWARD_TYPE_IDS.has(room.roomTypeId)) return;
+
+                const key = `${room.x},${room.y}`;
+                const existing = positionMap[key];
+
+                if (!existing) {
+                    positionMap[key] = room;
+                } else {
+                    // Keep the room with higher rarity, or higher tier if same rarity
+                    const existingRarity = ROOM_RARITY[existing.room] || 0;
+                    const newRarity = ROOM_RARITY[room.room] || 0;
+
+                    if (newRarity > existingRarity || (newRarity === existingRarity && room.tier > existing.tier)) {
+                        positionMap[key] = room;
+                    }
+                }
+            });
+
+            const rewardRooms = Object.values(positionMap);
+
+            // Find the best connected snake chain of REWARD rooms
+            function findBestChain(rooms) {
+                let bestChain = [];
+                const visited = new Set();
+
+                rooms.forEach(startRoom => {
+                    const key = `${startRoom.x},${startRoom.y}`;
+                    if (visited.has(key)) return;
+
+                    const chain = [startRoom];
+                    visited.add(key);
+                    let current = startRoom;
+
+                    while (true) {
+                        let bestNext = null;
+                        let bestDist = 999;
+
+                        rooms.forEach(r => {
+                            const rKey = `${r.x},${r.y}`;
+                            if (chain.some(c => `${c.x},${c.y}` === rKey)) return;
+                            const dist = Math.abs(current.x - r.x) + Math.abs(current.y - r.y);
+                            if (dist <= 1 && dist < bestDist) {
+                                bestDist = dist;
+                                bestNext = r;
+                            }
+                        });
+
+                        if (bestNext) {
+                            chain.push(bestNext);
+                            visited.add(`${bestNext.x},${bestNext.y}`);
+                            current = bestNext;
+                        } else break;
+                    }
+
+                    if (chain.length > bestChain.length) bestChain = chain;
+                });
+
+                return bestChain;
+            }
+
+            const bestChain = findBestChain(rewardRooms);
+            const chainLength = bestChain.length;
+
+            // Count special rooms
+            const spymasters = rewardRooms.filter(r => r.room === 'viper_spymaster').length;
+            const golems = rewardRooms.filter(r => r.room === 'golem_works').length;
+            const t7Rooms = rewardRooms.filter(r => (r.tier || 0) >= 7).length;
+            const t6Rooms = rewardRooms.filter(r => (r.tier || 0) === 6).length;
+
+            // NEW SCORING SYSTEM
+            // 1. Snake Chain Score (0-40)
+            let snakeScore = 0;
+            if (chainLength >= 8) snakeScore = 40;
+            else if (chainLength >= 6) snakeScore = 35;
+            else if (chainLength >= 5) snakeScore = 30;
+            else if (chainLength >= 4) snakeScore = 25;
+            else if (chainLength >= 3) snakeScore = 15;
+            else if (chainLength >= 2) snakeScore = 6;
+            else snakeScore = 2;
+
+            // 2. Room Quality Score (0-50) plus tech synergy bonus
+            let roomScore = 0;
+            roomScore += spymasters * 10;
+            roomScore += golems * 8;
+            roomScore += t7Rooms * 20;
+            roomScore += Math.min(15, t6Rooms * 3);
+
+            // Bonus for MANY T6+ rooms
+            const highTierCount = rewardRooms.filter(r => (r.tier || 0) >= 6).length;
+            if (highTierCount >= 5) roomScore += 10;
+
+            // Cap quality score to its intended 50-point scale
+            roomScore = Math.min(50, roomScore);
+
+            // Tech synergy bonus: reward Spymaster + Golem tech lines
+            let techBonus = 0;
+            if (spymasters >= 1 && golems >= 3) {
+                techBonus = 20; // Russian Tech + Roman Road combo
+            } else if (spymasters >= 1 || golems >= 3) {
+                techBonus = 10;
+            }
+
+            // Tech penalty: harshly penalize temples with no golems and no T7 rooms
+            let techPenalty = 0;
+            if (golems === 0 && t7Rooms === 0) {
+                techPenalty = 40;
+            } else if (golems === 0) {
+                techPenalty = 20;
+            }
+
+            // 3. Quantity Score (0-15)
+            const quantityScore = Math.min(15, rewardRooms.length * 0.8);
+
+            const totalScore = Math.max(0, Math.round(snakeScore + roomScore + techBonus - techPenalty + quantityScore));
+
+            let starRating;
+            let ratingDescription;
+
+            if (totalScore >= 85) {
+                starRating = 5;
+                ratingDescription = 'God Tier - Exceptional temple with outstanding quality';
+            } else if (totalScore >= 70) {
+                starRating = 4.5;
+                ratingDescription = 'Excellent - Very strong layout with high-value rooms';
+            } else if (totalScore >= 55) {
+                starRating = 4;
+                ratingDescription = 'Very Good - Strong snake chain and good rewards';
+            } else if (totalScore >= 40) {
+                starRating = 3.5;
+                ratingDescription = 'Good - Decent snake chain with valuable rooms';
+            } else if (totalScore >= 28) {
+                starRating = 3;
+                ratingDescription = 'Average - Basic optimization with some value';
+            } else if (totalScore >= 16) {
+                starRating = 2;
+                ratingDescription = 'Below Average - Weak snake chain, limited rewards';
+            } else {
+                starRating = 1;
+                ratingDescription = 'Poor - Broken snake chain, no optimization';
+            }
+
+            const suggestions = [];
+            if (chainLength < 4) {
+                suggestions.push('Snake chain is only ' + chainLength + ' rooms. Aim for 4+ connected reward rooms.');
+            }
+            if (rewardRooms.length < 10) {
+                suggestions.push('Consider adding more reward rooms to the temple.');
+            }
+
+            return {
+                roomCount: allRooms.length,
+                rewardRooms: rewardRooms.length,
+                architectRooms: allRooms.filter(r => r.room === 'architect').length,
+                bossRooms: allRooms.filter(r => r.room === 'boss' || r.room === 'atziri').length,
+                avgTier: 0,
+                highTierRooms: highTierCount,
+                spymasters: spymasters,
+                golems: golems,
+                t7Rooms: t7Rooms,
+                snakeScore: snakeScore,
+                roomScore: roomScore,
+                quantityScore: quantityScore,
+                techBonus,
+                techPenalty,
+                totalScore,
+                starRating,
+                ratingDescription,
+                suggestions,
+                bestChain: bestChain
+            };
+        }
+        
+        function renderStars(rating) {
+            let html = '';
+            const fullStars = Math.floor(rating);
+            const hasHalf = rating % 1 >= 0.5;
+            
+            for (let i = 0; i < 5; i++) {
+                if (i < fullStars) {
+                    html += '<span class="star filled">★</span>';
+                } else if (i === fullStars && hasHalf) {
+                    html += '<span class="star filled">★</span>';
+                } else {
+                    html += '<span class="star">★</span>';
+                }
+            }
+            
+            return html;
+        }
+        
+        function showError(message) {
+            const errorEl = document.getElementById('errorMessage');
+            errorEl.textContent = message;
+            errorEl.classList.add('visible');
+        }
+        
+        function hideError() {
+            document.getElementById('errorMessage').classList.remove('visible');
+        }
+        
+        async function analyzeTemple() {
+            hideError();
+            
+            const shareUrl = document.getElementById('shareUrl').value.trim();
+            
+            if (!shareUrl) {
+                showError('Please paste a share URL');
+                return;
+            }
+            
+            document.getElementById('loading').classList.add('visible');
+            document.getElementById('resultSection').classList.remove('visible');
+            
+            // Small delay for UX
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            try {
+                const encodedData = extractShareData(shareUrl);
+                
+                if (!encodedData) {
+                    throw new Error('Could not extract temple data from URL. Make sure the URL contains "?t=" parameter.');
+                }
+                
+                const templeData = decodeTempleData(encodedData);
+                
+                if (!templeData) {
+                    throw new Error('Failed to decode temple data. The data may be corrupted or use a different encoding format.');
+                }
+                
+                const analysis = analyzeTempleData(templeData);
+                
+                // Update UI
+                document.getElementById('stars').innerHTML = renderStars(analysis.starRating);
+                document.getElementById('ratingTitle').textContent = analysis.starRating + ' Stars';
+                document.getElementById('ratingDescription').textContent = analysis.ratingDescription;
+                
+                document.getElementById('totalScore').textContent = analysis.totalScore;
+                document.getElementById('rewardScore').textContent = analysis.snakeScore;
+                document.getElementById('techScore').textContent = analysis.roomScore;
+                
+                document.getElementById('roomCount').textContent = analysis.roomCount;
+                document.getElementById('rewardRooms').textContent = analysis.rewardRooms;
+                document.getElementById('architectRooms').textContent = analysis.architectRooms;
+                document.getElementById('rewardDensity').textContent = analysis.quantityScore;
+                
+                // Update all stat cards
+                document.getElementById('roomCount').textContent = analysis.roomCount;
+                document.getElementById('rewardRooms').textContent = analysis.rewardRooms;
+                document.getElementById('architectRooms').textContent = analysis.architectRooms;
+                document.getElementById('rewardDensity').textContent = Math.round(analysis.quantityScore) + '%';
+                
+                // Suggestions
+                const suggestionsSection = document.getElementById('suggestionsSection');
+                const suggestionsList = document.getElementById('suggestionsList');
+                
+                if (analysis.suggestions.length > 0) {
+                    suggestionsSection.style.display = 'block';
+                    suggestionsList.innerHTML = analysis.suggestions.map(s => `<li>${s}</li>`).join('');
+                } else {
+                    suggestionsSection.style.display = 'none';
+                }
+                
+                // Progress bars - new scoring scale
+                document.getElementById('rewardProgress').style.width = (analysis.snakeScore / 40 * 100) + '%';
+                document.getElementById('techProgress').style.width = (analysis.roomScore / 50 * 100) + '%';
+                
+                document.getElementById('loading').classList.remove('visible');
+                document.getElementById('resultSection').classList.add('visible');
+                
+            } catch (error) {
+                document.getElementById('loading').classList.remove('visible');
+                showError(error.message);
+            }
+        }
+        
+        // Allow Enter key to trigger analysis
+        document.getElementById('shareUrl').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && e.ctrlKey) {
+                analyzeTemple();
+            }
+        });
+    </script>
+</body>
+</html>
+
