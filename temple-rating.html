@@ -487,7 +487,10 @@
     </div>
     
     <script>
-        // Multiple charset versions for compatibility
+        (function() {
+            'use strict';
+
+            // Multiple charset versions for compatibility
         const CHARSETS = [
             // Base-40 charset with 467 (newest)
             '467ABCDEFHIJKMOPQRSTUWXYaghijklmnopuwxy',
@@ -588,6 +591,25 @@
             // Unknown
             'unknown': { type: 'unknown', baseValue: 1, highTierBonus: false },
         };
+
+        function validateShareURL(url) {
+            try {
+                const parsed = new URL(url);
+                // Validate protocol (prevent javascript:, data:, etc.)
+                if (!parsed.protocol.startsWith('http')) {
+                    throw new Error('Invalid protocol');
+                }
+                // Check for temple data parameter
+                const hash = parsed.hash;
+                if (!hash || !hash.includes('?t=')) {
+                    throw new Error('Missing temple data parameter');
+                }
+                return true;
+            } catch (error) {
+                console.error('Invalid URL:', error);
+                return false;
+            }
+        }
 
         function extractShareData(shareUrl) {
             try {
@@ -914,16 +936,26 @@
         
         async function analyzeTemple() {
             hideError();
-            
+
             const shareUrl = document.getElementById('shareUrl').value.trim();
-            
+
             if (!shareUrl) {
                 showError('Please paste a share URL');
                 return;
             }
-            
-            document.getElementById('loading').classList.add('visible');
-            document.getElementById('resultSection').classList.remove('visible');
+
+            // Security: Validate URL before processing
+            if (!validateShareURL(shareUrl)) {
+                showError('Invalid temple share URL. Please check the URL format.');
+                return;
+            }
+
+            // Cache loading elements
+            const loadingEl = document.getElementById('loading');
+            const resultSection = document.getElementById('resultSection');
+
+            loadingEl.classList.add('visible');
+            resultSection.classList.remove('visible');
             
             // Small delay for UX
             await new Promise(resolve => setTimeout(resolve, 500));
@@ -943,56 +975,89 @@
                 
                 const analysis = analyzeTempleData(templeData);
                 
-                // Update UI
-                document.getElementById('stars').innerHTML = renderStars(analysis.starRating);
-                document.getElementById('ratingTitle').textContent = analysis.starRating + ' Stars';
-                document.getElementById('ratingDescription').textContent = analysis.ratingDescription;
-                
-                document.getElementById('totalScore').textContent = analysis.totalScore;
-                document.getElementById('rewardScore').textContent = analysis.snakeScore;
-                document.getElementById('techScore').textContent = analysis.roomScore;
-                
-                document.getElementById('roomCount').textContent = analysis.roomCount;
-                document.getElementById('rewardRooms').textContent = analysis.rewardRooms;
-                document.getElementById('architectRooms').textContent = analysis.architectRooms;
-                document.getElementById('rewardDensity').textContent = analysis.quantityScore;
-                
-                // Update all stat cards
-                document.getElementById('roomCount').textContent = analysis.roomCount;
-                document.getElementById('rewardRooms').textContent = analysis.rewardRooms;
-                document.getElementById('architectRooms').textContent = analysis.architectRooms;
-                document.getElementById('rewardDensity').textContent = Math.round(analysis.quantityScore) + '%';
-                
-                // Suggestions
-                const suggestionsSection = document.getElementById('suggestionsSection');
-                const suggestionsList = document.getElementById('suggestionsList');
-                
-                if (analysis.suggestions.length > 0) {
-                    suggestionsSection.style.display = 'block';
-                    suggestionsList.innerHTML = analysis.suggestions.map(s => `<li>${s}</li>`).join('');
-                } else {
-                    suggestionsSection.style.display = 'none';
-                }
-                
-                // Progress bars - new scoring scale
-                document.getElementById('rewardProgress').style.width = (analysis.snakeScore / 40 * 100) + '%';
-                document.getElementById('techProgress').style.width = (analysis.roomScore / 50 * 100) + '%';
-                
-                document.getElementById('loading').classList.remove('visible');
-                document.getElementById('resultSection').classList.add('visible');
+                // Cache DOM elements to minimize queries
+                const elements = {
+                    stars: document.getElementById('stars'),
+                    ratingTitle: document.getElementById('ratingTitle'),
+                    ratingDescription: document.getElementById('ratingDescription'),
+                    totalScore: document.getElementById('totalScore'),
+                    rewardScore: document.getElementById('rewardScore'),
+                    techScore: document.getElementById('techScore'),
+                    roomCount: document.getElementById('roomCount'),
+                    rewardRooms: document.getElementById('rewardRooms'),
+                    architectRooms: document.getElementById('architectRooms'),
+                    rewardDensity: document.getElementById('rewardDensity'),
+                    suggestionsSection: document.getElementById('suggestionsSection'),
+                    suggestionsList: document.getElementById('suggestionsList'),
+                    rewardProgress: document.getElementById('rewardProgress'),
+                    techProgress: document.getElementById('techProgress'),
+                    loading: document.getElementById('loading'),
+                    resultSection: document.getElementById('resultSection')
+                };
+
+                // Batch DOM updates using requestAnimationFrame to reduce reflows
+                requestAnimationFrame(() => {
+                    // Update rating section
+                    elements.stars.innerHTML = renderStars(analysis.starRating);
+                    elements.ratingTitle.textContent = analysis.starRating + ' Stars';
+                    elements.ratingDescription.textContent = analysis.ratingDescription;
+
+                    // Update score section
+                    elements.totalScore.textContent = analysis.totalScore;
+                    elements.rewardScore.textContent = analysis.snakeScore;
+                    elements.techScore.textContent = analysis.roomScore;
+
+                    // Update stat cards
+                    elements.roomCount.textContent = analysis.roomCount;
+                    elements.rewardRooms.textContent = analysis.rewardRooms;
+                    elements.architectRooms.textContent = analysis.architectRooms;
+                    elements.rewardDensity.textContent = Math.round(analysis.quantityScore) + '%';
+
+                    // Update suggestions using DocumentFragment for batch insertion
+                    if (analysis.suggestions.length > 0) {
+                        elements.suggestionsSection.style.display = 'block';
+                        elements.suggestionsList.textContent = '';
+
+                        // Use DocumentFragment to minimize reflows
+                        const fragment = document.createDocumentFragment();
+                        analysis.suggestions.forEach(s => {
+                            const li = document.createElement('li');
+                            li.textContent = s;
+                            fragment.appendChild(li);
+                        });
+                        elements.suggestionsList.appendChild(fragment);
+                    } else {
+                        elements.suggestionsSection.style.display = 'none';
+                    }
+
+                    // Update progress bars
+                    elements.rewardProgress.style.width = (analysis.snakeScore / 40 * 100) + '%';
+                    elements.techProgress.style.width = (analysis.roomScore / 50 * 100) + '%';
+                });
+
+                // Show/hide sections (outside requestAnimationFrame for immediate feedback)
+                elements.loading.classList.remove('visible');
+                elements.resultSection.classList.add('visible');
                 
             } catch (error) {
-                document.getElementById('loading').classList.remove('visible');
+                // Use cached loading element
+                const loadingEl = document.getElementById('loading');
+                loadingEl.classList.remove('visible');
                 showError(error.message);
             }
         }
         
-        // Allow Enter key to trigger analysis
-        document.getElementById('shareUrl').addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' && e.ctrlKey) {
-                analyzeTemple();
-            }
-        });
+            // Allow Enter key to trigger analysis
+            document.getElementById('shareUrl').addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && e.ctrlKey) {
+                    analyzeTemple();
+                }
+            });
+
+            // Expose necessary functions to global scope for event handlers
+            window.analyzeTemple = analyzeTemple;
+
+        })();
     </script>
 </body>
 </html>
