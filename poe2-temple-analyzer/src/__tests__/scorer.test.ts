@@ -37,30 +37,30 @@ describe('Scorer', () => {
 
   describe('calculateStarRating', () => {
     it('should return 5 stars for excellent score', () => {
-      expect(calculateStarRating(900)).toBe(5);
+      expect(calculateStarRating(90)).toBe(5);
     });
 
     it('should return 4 stars for very good score', () => {
-      expect(calculateStarRating(700)).toBe(4);
+      expect(calculateStarRating(50)).toBe(4);
     });
 
     it('should return 3 stars for good score', () => {
-      expect(calculateStarRating(550)).toBe(3);
+      expect(calculateStarRating(35)).toBe(3);
     });
 
     it('should return 2 stars for fair score', () => {
-      expect(calculateStarRating(400)).toBe(2);
+      expect(calculateStarRating(20)).toBe(2);
     });
 
     it('should return 1 star for poor score', () => {
-      expect(calculateStarRating(100)).toBe(1);
+      expect(calculateStarRating(10)).toBe(1);
     });
 
     it('should handle boundary values', () => {
-      expect(calculateStarRating(850)).toBe(5);
-      expect(calculateStarRating(849)).toBe(4);
-      expect(calculateStarRating(700)).toBe(4);
-      expect(calculateStarRating(699)).toBe(3);
+      expect(calculateStarRating(90)).toBe(5);
+      expect(calculateStarRating(89)).toBe(4);
+      expect(calculateStarRating(50)).toBe(4);
+      expect(calculateStarRating(49)).toBe(3);
     });
   });
 
@@ -174,7 +174,7 @@ describe('Scorer', () => {
       const result = generateSuggestions(analysis);
 
       expect(result.length).toBeGreaterThan(0);
-      expect(result.some(s => s.includes('snake chain'))).toBe(true);
+      expect(result.some((s) => s.includes('snake chain'))).toBe(true);
     });
 
     it('should suggest adding high-value rooms', () => {
@@ -234,7 +234,7 @@ describe('Scorer', () => {
 
       const result = generateSuggestions(analysis);
 
-      expect(result.some(s => s.includes('reward rooms'))).toBe(true);
+      expect(result.some((s) => s.includes('reward rooms'))).toBe(true);
     });
 
     it('should suggest spymasters if none present', () => {
@@ -264,7 +264,7 @@ describe('Scorer', () => {
 
       const result = generateSuggestions(analysis);
 
-      expect(result.some(s => s.includes('Spymaster'))).toBe(true);
+      expect(result.some((s) => s.includes('Spymaster'))).toBe(true);
     });
 
     it('should suggest golems if none present', () => {
@@ -294,7 +294,7 @@ describe('Scorer', () => {
 
       const result = generateSuggestions(analysis);
 
-      expect(result.some(s => s.includes('Golem'))).toBe(true);
+      expect(result.some((s) => s.includes('Golem'))).toBe(true);
     });
 
     it('should return no suggestions for perfect temple', () => {

@@ -113,8 +113,8 @@ export function decodeTempleData(encoded: string): TempleData | null {
     if (!encoded) return null;
 
     // Handle base64-encoded temple data (newer format)
-    // Check if it looks like base64 (ends with =, contains +/, or has padding)
-    const looksLikeBase64 = /^[A-Za-z0-9+/=]+$/.test(encoded) && (encoded.includes('=') || encoded.includes('+') || encoded.includes('/'));
+    // Check if it looks like base64 (alphanumeric + /+ =)
+    const looksLikeBase64 = /^[A-Za-z0-9+/=]+$/.test(encoded);
 
     let workingString = encoded;
     if (looksLikeBase64) {

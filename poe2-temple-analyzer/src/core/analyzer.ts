@@ -175,22 +175,22 @@ interface RoomMetrics {
  * Calculate star rating and description
  */
 function calculateStarRating(totalScore: number): { rating: number; description: string } {
-  if (totalScore >= 75) {
+  if (totalScore >= 90) {
     return { rating: 5, description: 'God Tier - Exceptional temple with outstanding quality' };
   }
-  if (totalScore >= 60) {
+  if (totalScore >= 75) {
     return { rating: 4.5, description: 'Excellent - Very strong layout with high-value rooms' };
   }
   if (totalScore >= 50) {
     return { rating: 4, description: 'Very Good - Strong snake chain and good rewards' };
   }
-  if (totalScore >= 38) {
+  if (totalScore >= 40) {
     return { rating: 3.5, description: 'Good - Decent snake chain with valuable rooms' };
   }
-  if (totalScore >= 26) {
+  if (totalScore >= 25) {
     return { rating: 3, description: 'Average - Basic optimization with some value' };
   }
-  if (totalScore >= 16) {
+  if (totalScore >= 15) {
     return { rating: 2, description: 'Below Average - Weak snake chain, limited rewards' };
   }
   return { rating: 1, description: 'Poor - Broken snake chain, no optimization' };
@@ -207,7 +207,9 @@ function generateSuggestions(
   const suggestions: string[] = [];
 
   if (chainLength < 4) {
-    suggestions.push(`Snake chain is only ${chainLength} rooms. Aim for 4+ connected reward rooms.`);
+    suggestions.push(
+      `Snake chain is only ${chainLength} rooms. Aim for 4+ connected reward rooms.`
+    );
   }
 
   if (metrics.spymasters === 0 && metrics.t7Rooms === 0 && metrics.t6Rooms < 3) {
@@ -266,7 +268,9 @@ export function analyzeTemple(templeData: TempleData): TempleAnalysis {
   const techAnalysis = analyzeTechPatterns(templeData);
 
   // Total score (0-105): snake (40) + room (50) + quantity (15) + tech (bonus)
-  const totalScore = Math.round(snakeScore + roomScore + quantityScore + techAnalysis.totalTechScore);
+  const totalScore = Math.round(
+    snakeScore + roomScore + quantityScore + techAnalysis.totalTechScore
+  );
 
   // Star rating
   const { rating: starRating, description: ratingDescription } = calculateStarRating(totalScore);

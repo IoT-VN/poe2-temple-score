@@ -8,10 +8,10 @@ import type { RatingThresholds, ScoreCriteria } from '../types/scoring-types.js'
  * Star rating thresholds
  */
 export const RATING_THRESHOLDS: RatingThresholds = {
-  fiveStar: 850,
-  fourStar: 700,
-  threeStar: 550,
-  twoStar: 400,
+  fiveStar: 90,
+  fourStar: 50,
+  threeStar: 35,
+  twoStar: 20,
   oneStar: 0,
 };
 
@@ -19,13 +19,13 @@ export const RATING_THRESHOLDS: RatingThresholds = {
  * Score calculation criteria and weights
  */
 export const SCORE_CRITERIA: ScoreCriteria = {
-  maxScore: 1000,
+  maxScore: 475, // Base 105 (snake 40 + rooms 50 + quantity 15) + Tech 370
   weights: {
-    roomTiers: 0.40,
+    roomTiers: 0.4,
     roomDensity: 0.15,
     techPatterns: 0.25,
-    layoutEfficiency: 0.10,
-    rewardDensity: 0.10,
+    layoutEfficiency: 0.1,
+    rewardDensity: 0.1,
   },
 };
 
