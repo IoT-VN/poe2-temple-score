@@ -112,14 +112,33 @@ export function decodeTempleData(encoded: string): TempleData | null {
   try {
     if (!encoded) return null;
 
+    // Handle base64-encoded temple data (newer format)
+    // Check if it looks like base64 (ends with =, contains +/, or has padding)
+    const looksLikeBase64 = /^[A-Za-z0-9+/=]+$/.test(encoded) && (encoded.includes('=') || encoded.includes('+') || encoded.includes('/'));
+
+    let workingString = encoded;
+    if (looksLikeBase64) {
+      try {
+        // Try base64 decode first
+        const base64Decoded = Buffer.from(encoded, 'base64').toString('utf-8');
+        if (base64Decoded && base64Decoded.length > 0) {
+          workingString = base64Decoded;
+          console.log('Base64 decoded temple data');
+        }
+      } catch (e) {
+        // If base64 fails, use original string
+        console.log('Not base64 encoded, using original string');
+      }
+    }
+
     // Auto-detect charset from unique characters in the string
-    const uniqueChars = [...new Set(encoded)].sort().join('');
+    const uniqueChars = [...new Set(workingString)].sort().join('');
 
     // Try auto-detected charset first
     const charToVal: { [key: string]: number } = {};
     uniqueChars.split('').forEach((c, i) => (charToVal[c] = i));
 
-    const values = encoded.split('').map((c) => charToVal[c]);
+    const values = workingString.split('').map((c) => charToVal[c]);
 
     // Check if encoding is valid (all values should be 0-31 for 5-bit)
     if (!values.some((v) => v === undefined) && Math.max(...values) <= 31) {
@@ -138,7 +157,7 @@ export function decodeTempleData(encoded: string): TempleData | null {
 
     // Fall back to known charsets
     for (const charset of CHARSETS) {
-      const result = tryDecodeWithCharset(encoded, charset);
+      const result = tryDecodeWithCharset(workingString, charset);
       if (result) {
         return result;
       }

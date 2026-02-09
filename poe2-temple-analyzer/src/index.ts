@@ -21,6 +21,10 @@ export {
   calculateDensityScore,
   generateSuggestions,
 } from './core/scorer';
+export { analyzeTechPatterns } from './core/tech-detector';
+
+// Types
+export type { TempleData, TempleAnalysis, Room, TechBonus } from './types/temple-types';
 
 // Utilities
 export { extractShareData, validateShareURL } from './utils/url-parser';

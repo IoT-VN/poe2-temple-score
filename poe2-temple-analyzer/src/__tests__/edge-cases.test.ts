@@ -73,13 +73,19 @@ describe('Edge Cases for Coverage', () => {
         spymasters: 0,
         golems: 3,
         t7Rooms: 2,
+        t6Rooms: 4,
         snakeScore: 35,
         roomScore: 30,
         quantityScore: 12,
+        techScore: 0,
         totalScore: 77,
         starRating: 5,
         ratingDescription: 'Excellent',
         suggestions: [],
+        techBonuses: [],
+        hasRussianTech: false,
+        hasRomanRoad: false,
+        hasDoubleTriple: false,
       };
 
       const result = generateSuggestions(analysis);
@@ -96,13 +102,19 @@ describe('Edge Cases for Coverage', () => {
         spymasters: 2,
         golems: 0,
         t7Rooms: 2,
+        t6Rooms: 4,
         snakeScore: 35,
         roomScore: 30,
         quantityScore: 12,
+        techScore: 0,
         totalScore: 77,
         starRating: 5,
         ratingDescription: 'Excellent',
         suggestions: [],
+        techBonuses: [],
+        hasRussianTech: false,
+        hasRomanRoad: false,
+        hasDoubleTriple: false,
       };
 
       const result = generateSuggestions(analysis);

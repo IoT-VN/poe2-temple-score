@@ -991,6 +991,7 @@
                     suggestionsList: document.getElementById('suggestionsList'),
                     rewardProgress: document.getElementById('rewardProgress'),
                     techProgress: document.getElementById('techProgress'),
+                    techBadges: document.getElementById('techBadges'),
                     loading: document.getElementById('loading'),
                     resultSection: document.getElementById('resultSection')
                 };
@@ -1033,6 +1034,19 @@
                     // Update progress bars
                     elements.rewardProgress.style.width = (analysis.snakeScore / 40 * 100) + '%';
                     elements.techProgress.style.width = (analysis.roomScore / 50 * 100) + '%';
+
+                    // Update tech badges
+                    elements.techBadges.textContent = '';
+                    const techBonuses = analysis.techBonuses || [];
+                    techBonuses.forEach((bonus) => {
+                        const badge = document.createElement('div');
+                        badge.className = 'tech-badge' + (bonus.detected ? ' active' : '');
+                        badge.textContent = bonus.name + (bonus.detected ? ` (+${bonus.score})` : '');
+                        if (bonus.detected && bonus.description) {
+                            badge.title = bonus.description;
+                        }
+                        elements.techBadges.appendChild(badge);
+                    });
                 });
 
                 // Show/hide sections (outside requestAnimationFrame for immediate feedback)

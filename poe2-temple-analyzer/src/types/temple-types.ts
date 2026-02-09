@@ -30,6 +30,18 @@ export interface TempleData {
 }
 
 /**
+ * Detected tech bonus with details
+ */
+export interface TechBonus {
+  type: string;
+  name: string;
+  description: string;
+  score: number;
+  detected: boolean;
+  rooms?: Room[];
+}
+
+/**
  * Temple analysis result
  */
 export interface TempleAnalysis {
@@ -41,12 +53,18 @@ export interface TempleAnalysis {
   spymasters: number;
   golems: number;
   t7Rooms: number;
+  t6Rooms: number;
   snakeScore: number;
   roomScore: number;
   quantityScore: number;
+  techScore: number;
   totalScore: number;
   starRating: number;
   ratingDescription: string;
   suggestions: string[];
   decodedRooms?: Room[];
+  techBonuses: TechBonus[];
+  hasRussianTech: boolean;
+  hasRomanRoad: boolean;
+  hasDoubleTriple: boolean;
 }

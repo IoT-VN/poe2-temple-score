@@ -4,6 +4,7 @@
 
 import type { TempleData, TempleAnalysis, Room } from '../types/temple-types';
 import { LRUCache } from '../utils/cache';
+import { analyzeTechPatterns } from './tech-detector';
 
 /**
  * Room rarity for snake scoring
@@ -261,8 +262,11 @@ export function analyzeTemple(templeData: TempleData): TempleAnalysis {
   const { score: roomScore, metrics } = calculateRoomScore(rewardRooms);
   const quantityScore = Math.min(15, rewardRooms.length * 0.8);
 
-  // Total score (0-100)
-  const totalScore = Math.round(snakeScore + roomScore + quantityScore);
+  // Tech pattern analysis
+  const techAnalysis = analyzeTechPatterns(templeData);
+
+  // Total score (0-105): snake (40) + room (50) + quantity (15) + tech (bonus)
+  const totalScore = Math.round(snakeScore + roomScore + quantityScore + techAnalysis.totalTechScore);
 
   // Star rating
   const { rating: starRating, description: ratingDescription } = calculateStarRating(totalScore);
@@ -279,14 +283,20 @@ export function analyzeTemple(templeData: TempleData): TempleAnalysis {
     spymasters: metrics.spymasters,
     golems: metrics.golems,
     t7Rooms: metrics.t7Rooms,
+    t6Rooms: metrics.t6Rooms,
     snakeScore,
     roomScore,
     quantityScore,
+    techScore: techAnalysis.totalTechScore,
     totalScore,
     starRating,
     ratingDescription,
     suggestions,
     decodedRooms: templeData.decodedRooms,
+    techBonuses: techAnalysis.bonuses,
+    hasRussianTech: techAnalysis.hasRussianTech,
+    hasRomanRoad: techAnalysis.hasRomanRoad,
+    hasDoubleTriple: techAnalysis.hasDoubleTriple,
   };
 
   // Cache result

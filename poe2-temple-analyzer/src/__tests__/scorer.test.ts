@@ -163,6 +163,12 @@ describe('Scorer', () => {
         starRating: 2,
         ratingDescription: 'Poor',
         suggestions: [],
+        t6Rooms: 0,
+        techScore: 0,
+        techBonuses: [],
+        hasRussianTech: false,
+        hasRomanRoad: false,
+        hasDoubleTriple: false,
       };
 
       const result = generateSuggestions(analysis);
@@ -188,6 +194,12 @@ describe('Scorer', () => {
         starRating: 3,
         ratingDescription: 'Average',
         suggestions: [],
+        t6Rooms: 0,
+        techScore: 0,
+        techBonuses: [],
+        hasRussianTech: false,
+        hasRomanRoad: false,
+        hasDoubleTriple: false,
       };
 
       const result = generateSuggestions(analysis);
@@ -212,6 +224,12 @@ describe('Scorer', () => {
         starRating: 2,
         ratingDescription: 'Below Average',
         suggestions: [],
+        t6Rooms: 0,
+        techScore: 0,
+        techBonuses: [],
+        hasRussianTech: false,
+        hasRomanRoad: false,
+        hasDoubleTriple: false,
       };
 
       const result = generateSuggestions(analysis);
@@ -236,6 +254,12 @@ describe('Scorer', () => {
         starRating: 4,
         ratingDescription: 'Very Good',
         suggestions: [],
+        t6Rooms: 0,
+        techScore: 0,
+        techBonuses: [],
+        hasRussianTech: false,
+        hasRomanRoad: false,
+        hasDoubleTriple: false,
       };
 
       const result = generateSuggestions(analysis);
@@ -260,6 +284,12 @@ describe('Scorer', () => {
         starRating: 4,
         ratingDescription: 'Very Good',
         suggestions: [],
+        t6Rooms: 0,
+        techScore: 0,
+        techBonuses: [],
+        hasRussianTech: false,
+        hasRomanRoad: false,
+        hasDoubleTriple: false,
       };
 
       const result = generateSuggestions(analysis);
@@ -284,6 +314,12 @@ describe('Scorer', () => {
         starRating: 5,
         ratingDescription: 'Excellent',
         suggestions: [],
+        t6Rooms: 0,
+        techScore: 0,
+        techBonuses: [],
+        hasRussianTech: false,
+        hasRomanRoad: false,
+        hasDoubleTriple: false,
       };
 
       const result = generateSuggestions(analysis);
