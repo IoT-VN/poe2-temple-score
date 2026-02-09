@@ -143,11 +143,11 @@ function findBestChain(rooms: Room[]): Room[] {
  * Calculate snake score based on chain length
  */
 function calculateSnakeScore(chainLength: number): number {
-  // Capped at 20 instead of 40 - less influence
-  if (chainLength >= 8) return 20;
-  if (chainLength >= 6) return 15;
-  if (chainLength >= 4) return 10;
-  if (chainLength >= 2) return 5;
+  // Moderate influence - max 18 points
+  if (chainLength >= 8) return 18;
+  if (chainLength >= 6) return 12;
+  if (chainLength >= 4) return 8;
+  if (chainLength >= 2) return 4;
   return 2;
 }
 
@@ -161,15 +161,29 @@ function calculateRoomScore(rewardRooms: Room[]): { score: number; metrics: Room
   const t6Rooms = rewardRooms.filter((r) => (r.tier || 0) === 6).length;
 
   let roomScore = 0;
-  // Reduced weights
-  roomScore += t7Rooms * 12; // key differentiator
-  roomScore += spymasters * 5; // reduced
-  roomScore += golems * 4; // reduced
-  roomScore += Math.min(8, t6Rooms * 1.5); // reduced
 
-  // High-tier density bonus (only if lots of T6+)
+  // Critical bonuses for 5-star quality
+  if (spymasters >= 2) {
+    roomScore += 40; // Huge bonus for 2+ spymasters
+  } else if (spymasters === 1) {
+    roomScore += 15; // Moderate bonus for 1 spymaster
+  }
+
+  if (t7Rooms >= 3) {
+    roomScore += 50; // Huge bonus for 3+ T7 rooms
+  } else if (t7Rooms >= 1) {
+    roomScore += t7Rooms * 12; // Standard T7 scoring
+  }
+
+  roomScore += golems * 4; // golems
+
+  // T6 rooms with diminishing returns
+  const t6Score = t6Rooms <= 2 ? t6Rooms * 3 : 6 + (t6Rooms - 2) * 1;
+  roomScore += Math.min(10, t6Score);
+
+  // High-tier density bonus
   const highTierCount = rewardRooms.filter((r) => (r.tier || 0) >= 6).length;
-  if (highTierCount >= 6) roomScore += 3; // requires 6+ T6
+  if (highTierCount >= 6) roomScore += 3;
 
   return {
     score: roomScore,
@@ -195,16 +209,16 @@ interface RoomMetrics {
  * Calculate star rating and description
  */
 function calculateStarRating(totalScore: number): { rating: number; description: string } {
-  if (totalScore >= 45) {
+  if (totalScore >= 75) {
     return { rating: 5, description: 'God Tier - Exceptional temple with outstanding quality' };
   }
-  if (totalScore >= 32) {
+  if (totalScore >= 55) {
     return { rating: 4, description: 'Excellent - Very strong layout with high-value rooms' };
   }
-  if (totalScore >= 22) {
+  if (totalScore >= 35) {
     return { rating: 3, description: 'Good - Solid optimization with valuable rooms' };
   }
-  if (totalScore >= 12) {
+  if (totalScore >= 25) {
     return { rating: 2, description: 'Average - Basic optimization with some value' };
   }
   return { rating: 1, description: 'Poor - Broken snake chain, no optimization' };
@@ -277,13 +291,13 @@ export function analyzeTemple(templeData: TempleData): TempleAnalysis {
 
   const { score: roomScore, metrics } = calculateRoomScore(rewardRooms);
 
-  // Quantity score - penalize low density
+  // Quantity score - moderate influence
   const rewardDensity = rewardRooms.length / rooms.length;
   let quantityScore;
   if (rewardDensity >= 0.8) {
-    quantityScore = 15; // 80%+ reward rooms
+    quantityScore = 12; // 80%+ reward rooms
   } else if (rewardDensity >= 0.6) {
-    quantityScore = 10; // 60-79% reward rooms
+    quantityScore = 8; // 60-79% reward rooms
   } else if (rewardDensity >= 0.5) {
     quantityScore = 5; // 50-59% reward rooms
   } else {
@@ -293,7 +307,7 @@ export function analyzeTemple(templeData: TempleData): TempleAnalysis {
   // Tech pattern analysis
   const techAnalysis = analyzeTechPatterns(templeData);
 
-  // Total score (0-105): snake (40) + room (50) + quantity (15) + tech (bonus)
+  // Total score: snake (18) + room (50) + quantity (12) + tech (bonus)
   const totalScore = Math.round(
     snakeScore + roomScore + quantityScore + techAnalysis.totalTechScore
   );
