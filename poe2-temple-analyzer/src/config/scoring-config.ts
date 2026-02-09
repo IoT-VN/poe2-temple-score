@@ -10,8 +10,8 @@ import type { RatingThresholds, ScoreCriteria } from '../types/scoring-types.js'
 export const RATING_THRESHOLDS: RatingThresholds = {
   fiveStar: 90,
   fourStar: 50,
-  threeStar: 35,
-  twoStar: 20,
+  threeStar: 25,
+  twoStar: 15,
   oneStar: 0,
 };
 
