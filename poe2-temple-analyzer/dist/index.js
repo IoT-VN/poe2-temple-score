@@ -1,668 +1,114 @@
 "use strict";
+/**
+ * PoE2 Temple Analyzer MCP Server
+ *
+ * A Model Context Protocol server for analyzing Path of Exile 2 Vaal Temple layouts
+ */
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __exportStar = (this && this.__exportStar) || function(m, exports) {
+    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.decodeTempleData = decodeTempleData;
-exports.extractShareData = extractShareData;
-exports.analyzeTemple = analyzeTemple;
+exports.LRUCache = exports.validateShareURL = exports.extractShareData = exports.generateSuggestions = exports.calculateDensityScore = exports.calculateRoomValue = exports.calculateStarRating = exports.calculateOverallScore = exports.clearAnalysisCache = exports.countRoomsByTier = exports.filterRewardRooms = exports.analyzeTemple = exports.parseTempleArray = exports.decodeTempleData = void 0;
 const index_js_1 = require("@modelcontextprotocol/sdk/server/index.js");
 const stdio_js_1 = require("@modelcontextprotocol/sdk/server/stdio.js");
 const types_js_1 = require("@modelcontextprotocol/sdk/types.js");
-// Multiple charset versions for compatibility
-const CHARSETS = [
-    // Base-32 charset (newest)
-    'ABCDEFHIJKMOQRSTWXYaceghijkopqwx',
-    // Base-40 newest charset (2026)
-    '056ABCEFGIJKMQSTWXYaceghijklnopqrwxy',
-    // Base-40 newer charset
-    '56ABCDEFGIJKMOQRSUWXYaceghjklpwxy',
-    // Base-40 old charset (legacy)
-    '56ABCDEFGHIKMQRSTWYaceghjklnopwxy'
-];
-// Room type ID to name mapping (based on PoE2 temple)
-const ROOM_TYPE_IDS = {
-    0: 'empty',
-    1: 'path',
-    2: 'entry',
-    3: 'boss',
-    4: 'corruption',
-    5: 'sacrifice',
-    6: 'alchemy_lab',
-    7: 'armoury',
-    8: 'flesh_surgeon',
-    9: 'garrison',
-    10: 'generator',
-    11: 'golem_works',
-    12: 'reward_currency',
-    13: 'smithy',
-    14: 'synthflesh',
-    15: 'thaumaturge',
-    16: 'transcendent_barracks',
-    17: 'vault',
-    18: 'viper_legion_barracks',
-    19: 'viper_spymaster',
-    20: 'commander',
-    21: 'architect',
-    22: 'altar_of_sacrifice',
-    23: 'sacrificial_chamber',
-    24: 'reward_room',
-    25: 'medallion_bonus',
-    26: 'medallion_reroll',
-    27: 'medallion_levelup',
-    28: 'medallion_increase_max',
-    29: 'medallion_prevent_delete',
-    30: 'medallion_increase_tokens',
-    31: 'unknown'
-};
+// Import all modules
+// Types are re-exported from modules
+// Core functionality
+var decoder_1 = require("./core/decoder");
+Object.defineProperty(exports, "decodeTempleData", { enumerable: true, get: function () { return decoder_1.decodeTempleData; } });
+Object.defineProperty(exports, "parseTempleArray", { enumerable: true, get: function () { return decoder_1.parseTempleArray; } });
+var analyzer_1 = require("./core/analyzer");
+Object.defineProperty(exports, "analyzeTemple", { enumerable: true, get: function () { return analyzer_1.analyzeTemple; } });
+Object.defineProperty(exports, "filterRewardRooms", { enumerable: true, get: function () { return analyzer_1.filterRewardRooms; } });
+Object.defineProperty(exports, "countRoomsByTier", { enumerable: true, get: function () { return analyzer_1.countRoomsByTier; } });
+Object.defineProperty(exports, "clearAnalysisCache", { enumerable: true, get: function () { return analyzer_1.clearAnalysisCache; } });
+var scorer_1 = require("./core/scorer");
+Object.defineProperty(exports, "calculateOverallScore", { enumerable: true, get: function () { return scorer_1.calculateOverallScore; } });
+Object.defineProperty(exports, "calculateStarRating", { enumerable: true, get: function () { return scorer_1.calculateStarRating; } });
+Object.defineProperty(exports, "calculateRoomValue", { enumerable: true, get: function () { return scorer_1.calculateRoomValue; } });
+Object.defineProperty(exports, "calculateDensityScore", { enumerable: true, get: function () { return scorer_1.calculateDensityScore; } });
+Object.defineProperty(exports, "generateSuggestions", { enumerable: true, get: function () { return scorer_1.generateSuggestions; } });
+// Utilities
+var url_parser_1 = require("./utils/url-parser");
+Object.defineProperty(exports, "extractShareData", { enumerable: true, get: function () { return url_parser_1.extractShareData; } });
+Object.defineProperty(exports, "validateShareURL", { enumerable: true, get: function () { return url_parser_1.validateShareURL; } });
+var cache_1 = require("./utils/cache");
+Object.defineProperty(exports, "LRUCache", { enumerable: true, get: function () { return cache_1.LRUCache; } });
+// Configuration
+__exportStar(require("./config/room-types"), exports);
+__exportStar(require("./config/scoring-config"), exports);
+// Tools
+const analyze_temple_url_1 = require("./tools/analyze-temple-url");
+const analyze_temple_data_1 = require("./tools/analyze-temple-data");
+const get_room_info_1 = require("./tools/get-room-info");
+const get_rating_criteria_1 = require("./tools/get-rating-criteria");
 /**
- * Room type definitions with reward values
+ * Create MCP Server
  */
-const ROOM_TYPES = {
-    'alchemy_lab': { type: 'reward', rewardValue: 3, isReward: true },
-    'armoury': { type: 'reward', rewardValue: 2, isReward: true },
-    'corruption': { type: 'special', rewardValue: 1, isReward: false },
-    'flesh_surgeon': { type: 'reward', rewardValue: 3, isReward: true },
-    'garrison': { type: 'reward', rewardValue: 2, isReward: true },
-    'generator': { type: 'reward', rewardValue: 2, isReward: true },
-    'golem_works': { type: 'reward', rewardValue: 2, isReward: true },
-    'reward_currency': { type: 'reward', rewardValue: 4, isReward: true },
-    'sacrifice_room': { type: 'special', rewardValue: 0, isReward: false },
-    'sacrificial_chamber': { type: 'special', rewardValue: 0, isReward: false },
-    'smithy': { type: 'reward', rewardValue: 2, isReward: true },
-    'synthflesh': { type: 'reward', rewardValue: 3, isReward: true },
-    'thaumaturge': { type: 'reward', rewardValue: 2, isReward: true },
-    'transcendent_barracks': { type: 'reward', rewardValue: 2, isReward: true },
-    'vault': { type: 'reward', rewardValue: 4, isReward: true },
-    'viper_legion_barracks': { type: 'reward', rewardValue: 2, isReward: true },
-    'viper_spymaster': { type: 'reward', rewardValue: 3, isReward: true },
-    'commander': { type: 'architect', rewardValue: 0, isReward: false },
-    'architect': { type: 'architect', rewardValue: 0, isReward: false },
-    'atziri': { type: 'boss', rewardValue: 0, isReward: false },
-    'altar_of_sacrifice': { type: 'special', rewardValue: 0, isReward: false },
-    'empty': { type: 'empty', rewardValue: 0, isReward: false },
-    'path': { type: 'path', rewardValue: 0, isReward: false },
-    'reward_room': { type: 'reward', rewardValue: 3, isReward: true },
-    'medallion_bonus': { type: 'special', rewardValue: 0, isReward: false },
-    'medallion_reroll': { type: 'special', rewardValue: 0, isReward: false },
-    'medallion_levelup': { type: 'special', rewardValue: 0, isReward: false },
-    'medallion_increase_max': { type: 'special', rewardValue: 0, isReward: false },
-    'medallion_prevent_delete': { type: 'special', rewardValue: 0, isReward: false },
-    'medallion_increase_tokens': { type: 'special', rewardValue: 0, isReward: false },
-    'unknown': { type: 'unknown', rewardValue: 1, isReward: false },
-};
-/**
- * Auto-detect charset from encoded string and decode
- * Supports all known charset versions plus auto-detection
- */
-function decodeTempleData(encoded) {
-    try {
-        if (!encoded)
-            return null;
-        // Generate all possible charsets by combining known patterns
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const baseChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-        const uniqueChars = [...new Set(encoded)].sort().join('');
-        // Try auto-detected charset first (from unique chars in the string)
-        const charToVal = {};
-        uniqueChars.split('').forEach((c, i) => charToVal[c] = i);
-        // Convert to 5-bit values
-        const values = encoded.split('').map(c => charToVal[c]);
-        // Check if encoding is valid (all values should be 0-31 for 5-bit)
-        if (!values.some(v => v === undefined) && Math.max(...values) <= 31) {
-            // Pack 5-bit values into bit string
-            let bitString = '';
-            values.forEach(v => {
-                bitString += v.toString(2).padStart(5, '0');
-            });
-            // Decode rooms
-            const grid = {};
-            const decodedRooms = [];
-            let pos = 0;
-            while (pos + 16 <= bitString.length) {
-                const x = parseInt(bitString.substring(pos, pos + 4), 2);
-                const y = parseInt(bitString.substring(pos + 4, pos + 8), 2);
-                const roomTypeId = parseInt(bitString.substring(pos + 8, pos + 13), 2);
-                const tier = parseInt(bitString.substring(pos + 13, pos + 16), 2);
-                pos += 16;
-                if (x < 16 && y < 16 && roomTypeId <= 31) {
-                    const roomName = ROOM_TYPE_IDS[roomTypeId] || 'unknown_' + roomTypeId;
-                    const key = `${x},${y}`;
-                    const room = {
-                        x,
-                        y,
-                        room: roomName,
-                        tier: tier,
-                        roomTypeId: roomTypeId
-                    };
-                    grid[key] = room;
-                    decodedRooms.push(room);
-                }
-            }
-            // Only return if we decoded at least some valid rooms
-            if (Object.keys(grid).length > 5) {
-                console.log(`Auto-detected charset with ${uniqueChars.length} characters`);
-                return { grid, decodedRooms: decodedRooms };
-            }
-        }
-        // Fall back to known charsets
-        for (const charset of CHARSETS) {
-            const charsetCharToVal = {};
-            charset.split('').forEach((c, i) => charsetCharToVal[c] = i);
-            const charsetValues = encoded.split('').map(c => charsetCharToVal[c]);
-            if (charsetValues.some(v => v === undefined)) {
-                continue;
-            }
-            let bitString = '';
-            charsetValues.forEach(v => {
-                bitString += v.toString(2).padStart(5, '0');
-            });
-            const charsetGrid = {};
-            const charsetDecodedRooms = [];
-            let pos = 0;
-            while (pos + 16 <= bitString.length) {
-                const x = parseInt(bitString.substring(pos, pos + 4), 2);
-                const y = parseInt(bitString.substring(pos + 4, pos + 8), 2);
-                const roomTypeId = parseInt(bitString.substring(pos + 8, pos + 13), 2);
-                const tier = parseInt(bitString.substring(pos + 13, pos + 16), 2);
-                pos += 16;
-                if (x < 16 && y < 16 && roomTypeId <= 31) {
-                    const roomName = ROOM_TYPE_IDS[roomTypeId] || 'unknown_' + roomTypeId;
-                    const key = `${x},${y}`;
-                    const room = {
-                        x,
-                        y,
-                        room: roomName,
-                        tier: tier,
-                        roomTypeId: roomTypeId
-                    };
-                    charsetGrid[key] = room;
-                    charsetDecodedRooms.push(room);
-                }
-            }
-            if (Object.keys(charsetGrid).length > 5) {
-                return { grid: charsetGrid, decodedRooms: charsetDecodedRooms };
-            }
-        }
-        throw new Error('Could not decode temple data');
-    }
-    catch (error) {
-        console.error('Error decoding temple data:', error);
-        return null;
-    }
-}
-/**
- * Extract the 't' parameter from share URL
- */
-function extractShareData(shareUrl) {
-    try {
-        const url = new URL(shareUrl);
-        const hash = url.hash;
-        // Check if hash contains '?t='
-        const tParamMatch = hash.match(/\?t=([^&]+)/);
-        if (tParamMatch) {
-            return tParamMatch[1];
-        }
-        return null;
-    }
-    catch {
-        return null;
-    }
-}
-/**
- * Parse temple data from array format (common in PoE2 temple builders)
- */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
-function parseTempleArray(data) {
-    const grid = {};
-    if (Array.isArray(data)) {
-        data.forEach((item, index) => {
-            if (item && typeof item === 'object') {
-                const x = item.x !== undefined ? item.x : (index % 10);
-                const y = item.y !== undefined ? item.y : Math.floor(index / 10);
-                const room = item.room || item.type || item.name || 'empty';
-                const key = `${x},${y}`;
-                grid[key] = { x, y, room, tier: item.tier };
-            }
-        });
-    }
-    return { grid };
-}
-/**
- * Calculate distance between two points
- */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function calculateDistance(x1, y1, x2, y2) {
-    return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
-}
-/**
- * Check if a path is a straight line
- */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function isStraightLine(path) {
-    if (path.length < 2)
-        return false;
-    const first = path[0];
-    const last = path[path.length - 1];
-    // Check if all intermediate points are on the line between first and last
-    for (let i = 1; i < path.length - 1; i++) {
-        const point = path[i];
-        // Calculate the area of the triangle formed by the three points
-        const area = Math.abs((last.x - first.x) * (point.y - first.y) -
-            (last.y - first.y) * (point.x - first.x));
-        if (area > 0.01) {
-            return false;
-        }
-    }
-    return true;
-}
-/**
- * Find path using BFS
- */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function findPath(grid, start, end) {
-    const visited = new Set();
-    const queue = [];
-    const startKey = `${start.x},${start.y}`;
-    const endKey = `${end.x},${end.y}`;
-    queue.push({ pos: start, path: [start] });
-    visited.add(startKey);
-    const directions = [
-        { x: 0, y: -1 }, // up
-        { x: 0, y: 1 }, // down
-        { x: -1, y: 0 }, // left
-        { x: 1, y: 0 }, // right
-    ];
-    while (queue.length > 0) {
-        const current = queue.shift();
-        const currentKey = `${current.pos.x},${current.pos.y}`;
-        if (currentKey === endKey) {
-            return current.path;
-        }
-        for (const dir of directions) {
-            const nextX = current.pos.x + dir.x;
-            const nextY = current.pos.y + dir.y;
-            const nextKey = `${nextX},${nextY}`;
-            if (!visited.has(nextKey) && grid[nextKey] && grid[nextKey].room !== 'empty') {
-                visited.add(nextKey);
-                queue.push({
-                    pos: { x: nextX, y: nextY },
-                    path: [...current.path, { x: nextX, y: nextY }]
-                });
-            }
-        }
-    }
-    return [];
-}
-/**
- * Analyze temple layout and calculate star rating
- * Based on: Snake Chain + Rarity + Quantity
- */
-function analyzeTemple(templeData) {
-    const grid = templeData.grid || {};
-    const rooms = Object.values(grid);
-    // Room rarity for snake scoring (higher = better)
-    const ROOM_RARITY = {
-        'viper_spymaster': 10,
-        'golem_works': 9,
-        'viper_legion_barracks': 8,
-        'transcendent_barracks': 7,
-        'vault': 6,
-        'reward_currency': 5,
-        'reward_room': 5,
-        'alchemy_lab': 4,
-        'flesh_surgeon': 4,
-        'synthflesh': 4,
-        'thaumaturge': 3,
-        'smithy': 3,
-        'armoury': 2,
-        'generator': 2,
-        'garrison': 2,
-    };
-    // Filter to unique reward rooms
-    const rewardRooms = [];
-    const seenRooms = new Set();
-    rooms.forEach(room => {
-        if (room.room === 'empty' || room.room === 'path')
-            return;
-        const key = room.y + ',' + room.x + ',' + room.room;
-        if (seenRooms.has(key))
-            return;
-        seenRooms.add(key);
-        if (ROOM_RARITY[room.room] > 0) {
-            rewardRooms.push(room);
-        }
-    });
-    // Find the best connected snake chain
-    function findBestChain(rooms) {
-        let bestChain = [];
-        const visited = new Set();
-        rooms.forEach(startRoom => {
-            const key = startRoom.y + ',' + startRoom.x;
-            if (visited.has(key))
-                return;
-            const chain = [startRoom];
-            visited.add(key);
-            let current = startRoom;
-            // Extend chain forward
-            let extending = true;
-            while (extending) {
-                let bestNext = null;
-                let bestDist = 999;
-                rooms.forEach(r => {
-                    if (chain.includes(r))
-                        return;
-                    const dist = Math.abs(current.x - r.x) + Math.abs(current.y - r.y);
-                    if (dist <= 1 && dist < bestDist) {
-                        bestDist = dist;
-                        bestNext = r;
-                    }
-                });
-                if (bestNext) {
-                    chain.push(bestNext);
-                    visited.add(bestNext.y + ',' + bestNext.x);
-                    current = bestNext;
-                }
-                else {
-                    extending = false;
-                }
-            }
-            if (chain.length > bestChain.length)
-                bestChain = chain;
-        });
-        return bestChain;
-    }
-    const bestChain = findBestChain(rewardRooms);
-    // Calculate metrics
-    const chainLength = bestChain.length;
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const chainTierSum = bestChain.reduce((sum, r) => sum + (r.tier || 0), 0);
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const chainAvgTier = chainLength > 0 ? chainTierSum / chainLength : 0;
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const chainRaritySum = bestChain.reduce((sum, r) => sum + (ROOM_RARITY[r.room] || 0), 0);
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const highTierRooms = rewardRooms.filter(r => (r.tier || 0) >= 6).length;
-    // ==========================================
-    // NEW BALANCED SCORING (Snake + Room Quality + Density)
-    // ==========================================
-    // 1. Snake Score (0-40)
-    let snakeScore = 0;
-    if (chainLength >= 8)
-        snakeScore = 40;
-    else if (chainLength >= 6)
-        snakeScore = 35;
-    else if (chainLength >= 5)
-        snakeScore = 30;
-    else if (chainLength >= 4)
-        snakeScore = 25;
-    else if (chainLength >= 3)
-        snakeScore = 15;
-    else if (chainLength >= 2)
-        snakeScore = 6;
-    else
-        snakeScore = 2;
-    // 2. Room Quality Score
-    const spymasters = rewardRooms.filter(r => r.room === 'viper_spymaster').length;
-    const golems = rewardRooms.filter(r => r.room === 'golem_works').length;
-    const t7Rooms = rewardRooms.filter(r => (r.tier || 0) >= 7).length;
-    const t6Rooms = rewardRooms.filter(r => (r.tier || 0) === 6).length;
-    let roomScore = 0;
-    roomScore += spymasters * 10;
-    roomScore += golems * 8;
-    roomScore += t7Rooms * 30;
-    roomScore += Math.min(15, t6Rooms * 3);
-    // Bonus for MANY T6+ rooms
-    const highTierCount = rewardRooms.filter(r => (r.tier || 0) >= 6).length;
-    if (highTierCount >= 5)
-        roomScore += 10;
-    // 3. Quantity Score - High density bonus
-    const quantityScore = Math.min(15, rewardRooms.length * 0.8);
-    // Total score (0-100)
-    const totalScore = Math.round(snakeScore + roomScore + quantityScore);
-    // Star rating
-    let starRating;
-    let ratingDescription;
-    if (totalScore >= 75) {
-        starRating = 5;
-        ratingDescription = "God Tier - Exceptional temple with outstanding quality";
-    }
-    else if (totalScore >= 60) {
-        starRating = 4.5;
-        ratingDescription = "Excellent - Very strong layout with high-value rooms";
-    }
-    else if (totalScore >= 50) {
-        starRating = 4;
-        ratingDescription = "Very Good - Strong snake chain and good rewards";
-    }
-    else if (totalScore >= 38) {
-        starRating = 3.5;
-        ratingDescription = "Good - Decent snake chain with valuable rooms";
-    }
-    else if (totalScore >= 26) {
-        starRating = 3;
-        ratingDescription = "Average - Basic optimization with some value";
-    }
-    else if (totalScore >= 16) {
-        starRating = 2;
-        ratingDescription = "Below Average - Weak snake chain, limited rewards";
-    }
-    else {
-        starRating = 1;
-        ratingDescription = "Poor - Broken snake chain, no optimization";
-    }
-    // Suggestions
-    const suggestions = [];
-    if (chainLength < 4) {
-        suggestions.push(`Snake chain is only ${chainLength} rooms. Aim for 4+ connected reward rooms.`);
-    }
-    if (spymasters === 0 && t7Rooms === 0 && t6Rooms < 3) {
-        suggestions.push("Consider adding more high-value rooms (Spymasters, T7 rooms, or multiple T6 rooms).");
-    }
-    if (rewardRooms.length < 10) {
-        suggestions.push("Consider adding more reward rooms to the temple.");
-    }
-    return {
-        roomCount: rooms.length,
-        rewardRooms: rewardRooms.length,
-        architectRooms: rooms.filter(r => r.room === 'architect').length,
-        bossRooms: rooms.filter(r => r.room === 'boss' || r.room === 'atziri').length,
-        highTierRooms: highTierCount,
-        spymasters: spymasters,
-        golems: golems,
-        t7Rooms: t7Rooms,
-        snakeScore: snakeScore,
-        roomScore: roomScore,
-        quantityScore: quantityScore,
-        totalScore,
-        starRating,
-        ratingDescription,
-        suggestions,
-        decodedRooms: templeData.decodedRooms
-    };
-}
-// Create MCP Server
 const server = new index_js_1.Server({
-    name: "poe2-temple-analyzer",
-    version: "1.0.0",
+    name: 'poe2-temple-analyzer',
+    version: '1.0.0',
 }, {
     capabilities: {
         tools: {},
     },
 });
-// List available tools
+/**
+ * List available tools
+ */
 server.setRequestHandler(types_js_1.ListToolsRequestSchema, async () => {
     return {
         tools: [
             {
-                name: "analyze_temple",
-                description: "Analyze a PoE2 Vaal Temple layout from a share URL and calculate star rating",
-                inputSchema: {
-                    type: "object",
-                    properties: {
-                        shareUrl: {
-                            type: "string",
-                            description: "The share URL containing temple data (e.g., http://localhost:8080/#/atziri-temple?t=...)",
-                        },
-                    },
-                    required: ["shareUrl"],
-                },
+                name: analyze_temple_url_1.name,
+                description: 'Analyze a PoE2 Vaal Temple layout from a share URL and calculate star rating',
+                inputSchema: analyze_temple_url_1.inputSchema,
             },
             {
-                name: "analyze_temple_data",
-                description: "Analyze temple data directly from decoded JSON structure",
-                inputSchema: {
-                    type: "object",
-                    properties: {
-                        templeData: {
-                            type: "object",
-                            description: "The decoded temple data object with grid and room information",
-                        },
-                    },
-                    required: ["templeData"],
-                },
+                name: analyze_temple_data_1.name,
+                description: 'Analyze temple data directly from decoded JSON structure',
+                inputSchema: analyze_temple_data_1.inputSchema,
             },
             {
-                name: "get_room_info",
-                description: "Get information about a specific room type in PoE2 Vaal Temple",
-                inputSchema: {
-                    type: "object",
-                    properties: {
-                        roomType: {
-                            type: "string",
-                            description: "The room type name (e.g., 'alchemy_lab', 'vault', 'commander')",
-                        },
-                    },
-                    required: ["roomType"],
-                },
+                name: get_room_info_1.name,
+                description: 'Get information about a specific room type in PoE2 Vaal Temple',
+                inputSchema: get_room_info_1.inputSchema,
             },
             {
-                name: "get_rating_criteria",
-                description: "Get the criteria and formulas used for calculating star ratings",
-                inputSchema: {
-                    type: "object",
-                    properties: {},
-                },
+                name: get_rating_criteria_1.name,
+                description: 'Get the criteria and formulas used for calculating star ratings',
+                inputSchema: get_rating_criteria_1.inputSchema,
             },
         ],
     };
 });
-// Handle tool calls
+/**
+ * Handle tool calls
+ */
 server.setRequestHandler(types_js_1.CallToolRequestSchema, async (request) => {
     const { name, arguments: args } = request.params;
     try {
         switch (name) {
-            case "analyze_temple": {
-                const shareUrl = args?.shareUrl;
-                const encodedData = extractShareData(shareUrl);
-                if (!encodedData) {
-                    throw new Error("Could not extract temple data from URL");
-                }
-                const templeData = decodeTempleData(encodedData);
-                if (!templeData) {
-                    throw new Error("Failed to decode temple data");
-                }
-                const analysis = analyzeTemple(templeData);
-                return {
-                    content: [
-                        {
-                            type: "text",
-                            text: JSON.stringify(analysis, null, 2),
-                        },
-                    ],
-                };
-            }
-            case "analyze_temple_data": {
-                const templeData = args?.templeData;
-                const analysis = analyzeTemple(templeData);
-                return {
-                    content: [
-                        {
-                            type: "text",
-                            text: JSON.stringify(analysis, null, 2),
-                        },
-                    ],
-                };
-            }
-            case "get_room_info": {
-                const roomType = args?.roomType;
-                const roomInfo = ROOM_TYPES[roomType];
-                if (!roomInfo) {
-                    return {
-                        content: [
-                            {
-                                type: "text",
-                                text: `Room type '${roomType}' not found in database`,
-                            },
-                        ],
-                    };
-                }
-                return {
-                    content: [
-                        {
-                            type: "text",
-                            text: JSON.stringify(roomInfo, null, 2),
-                        },
-                    ],
-                };
-            }
-            case "get_rating_criteria": {
-                const criteria = {
-                    description: "Star rating is calculated based on two main factors:",
-                    rewardLayoutScore: {
-                        maxPoints: 40,
-                        description: "Based on reward room density (percentage of total rooms that are reward rooms)",
-                        formula: "min(40, rewardDensity * 0.8)"
-                    },
-                    techScore: {
-                        maxPoints: 60,
-                        breakdown: {
-                            russianTech: {
-                                points: 30,
-                                condition: "Perfect straight line path from entry to boss (deviation <= 0.5)"
-                            },
-                            romanRoad: {
-                                points: 20,
-                                condition: "Near-straight path from entry to boss (deviation <= 1.5)"
-                            },
-                            straightLinePath: {
-                                points: 10,
-                                condition: "Basic straight line path detected"
-                            },
-                            highRewardDensity: {
-                                points: "10-20",
-                                condition: "50%+ reward density bonus"
-                            },
-                            architectPlacement: {
-                                points: 10,
-                                condition: "2+ architect rooms"
-                            }
-                        }
-                    },
-                    totalScore: "rewardLayoutScore + techScore (max 100)",
-                    starRating: {
-                        criteria: {
-                            "5 stars": "90-100 points",
-                            "4.5 stars": "75-89 points",
-                            "4 stars": "60-74 points",
-                            "3.5 stars": "45-59 points",
-                            "3 stars": "30-44 points",
-                            "2.5 stars": "15-29 points",
-                            "2 stars": "0-14 points"
-                        }
-                    },
-                    encoding: {
-                        format: "Base-40 with 5-bit values",
-                        charset: CHARSETS[0],
-                        roomEncoding: "16 bits per room: 4 bits x + 4 bits y + 5 bits room type + 3 bits tier"
-                    }
-                };
-                return {
-                    content: [
-                        {
-                            type: "text",
-                            text: JSON.stringify(criteria, null, 2),
-                        },
-                    ],
-                };
-            }
+            case analyze_temple_url_1.name:
+                return await (0, analyze_temple_url_1.handler)(args);
+            case analyze_temple_data_1.name:
+                return await (0, analyze_temple_data_1.handler)(args);
+            case get_room_info_1.name:
+                return await (0, get_room_info_1.handler)(args);
+            case get_rating_criteria_1.name:
+                return await (0, get_rating_criteria_1.handler)();
             default:
                 throw new Error(`Unknown tool: ${name}`);
         }
@@ -671,18 +117,20 @@ server.setRequestHandler(types_js_1.CallToolRequestSchema, async (request) => {
         return {
             content: [
                 {
-                    type: "text",
+                    type: 'text',
                     text: `Error: ${error instanceof Error ? error.message : String(error)}`,
                 },
             ],
         };
     }
 });
-// Start server
+/**
+ * Start server
+ */
 async function main() {
     const transport = new stdio_js_1.StdioServerTransport();
     await server.connect(transport);
-    console.error("PoE2 Temple Analyzer MCP Server started");
+    console.error('PoE2 Temple Analyzer MCP Server started');
 }
 main().catch(console.error);
 //# sourceMappingURL=index.js.map
