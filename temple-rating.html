@@ -15,8 +15,10 @@
             --bg-dark: #141414;
             --bg-panel: #1e1e1e;
             --bg-cell: #252525;
+            --bg-cell-empty: #1a1a1a;
             --bg-hover: #2a2a2a;
             --border: #333;
+            --border-gold: #6b5b3d;
             --gold: #a08050;
             --gold-light: #c9a860;
             --green: #4ade80;
@@ -24,8 +26,12 @@
             --red: #f87171;
             --purple: #c084fc;
             --cyan: #22d3ee;
+            --orange: #fb923c;
             --text: #d4d4d4;
             --text-muted: #888;
+            --text-dim: #555;
+            --radius: 5px;
+            --radius-sm: 2.5px;
         }
         
         body {
@@ -292,11 +298,307 @@
             border: 1px solid var(--border);
             margin-top: 20px;
         }
-        
+
         .criteria-section h3 {
             color: var(--gold-light);
             margin-bottom: 20px;
             font-size: 1.1rem;
+        }
+
+        .evaluation-section {
+            background: var(--bg-panel);
+            border-radius: var(--radius);
+            padding: 15px;
+            border: 1px solid var(--border);
+            margin-top: 20px;
+            overflow-y: auto;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        .evaluation-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 10px;
+        }
+
+        .evaluation-header h3 {
+            color: var(--gold-light);
+            font-size: 13.75px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.625px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .toggle-icon {
+            color: var(--text-muted);
+            transition: transform 0.3s ease;
+            font-size: 12.5px;
+        }
+
+        .toggle-icon.open {
+            transform: rotate(180deg);
+        }
+
+        .evaluation-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .evaluation-content.open {
+            max-height: 2000px;
+            margin-top: 15px;
+        }
+
+        .metric-row {
+            padding: 8px 12px;
+            background: rgba(99, 102, 241, 0.08);
+            border-left: 3px solid var(--gold);
+            border-radius: 4px;
+            font-size: 13px;
+            line-height: 1.5;
+            margin-bottom: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.15s ease;
+        }
+
+        .metric-row:hover {
+            background: rgba(99, 102, 241, 0.12);
+            border-left-color: var(--gold-light);
+        }
+
+        .metric-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .metric-label {
+            color: var(--text);
+            font-size: 13px;
+        }
+
+        .metric-value {
+            color: var(--gold);
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+        .metric-value.green { color: var(--green); }
+        .metric-value.blue { color: var(--blue); }
+        .metric-value.red { color: var(--red); }
+        .metric-value.purple { color: var(--purple); }
+        .metric-value.cyan { color: var(--cyan); }
+
+        .difficulty-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .difficulty-easy { background: rgba(74, 222, 128, 0.2); color: var(--green); }
+        .difficulty-moderate { background: rgba(96, 165, 250, 0.2); color: var(--blue); }
+        .difficulty-hard { background: rgba(251, 191, 36, 0.2); color: #fbbf24; }
+        .difficulty-very-hard { background: rgba(251, 146, 60, 0.2); color: #fb923c; }
+        .difficulty-extreme { background: rgba(248, 113, 113, 0.2); color: var(--red); }
+
+        .rating-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .rating-poor { background: rgba(248, 113, 113, 0.2); color: var(--red); }
+        .rating-fair { background: rgba(251, 146, 60, 0.2); color: #fb923c; }
+        .rating-good { background: rgba(251, 191, 36, 0.2); color: #fbbf24; }
+        .rating-excellent { background: rgba(74, 222, 128, 0.2); color: var(--green); }
+        .rating-outstanding { background: rgba(192, 132, 252, 0.2); color: var(--purple); }
+
+        .chain-list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .chain-item {
+            padding: 8px 12px;
+            background: rgba(99, 102, 241, 0.08);
+            border-left: 3px solid var(--cyan);
+            border-radius: 4px;
+            font-size: 13px;
+            line-height: 1.5;
+            transition: all 0.15s ease;
+        }
+
+        .chain-item:hover {
+            background: rgba(99, 102, 241, 0.12);
+            border-left-color: var(--cyan);
+        }
+
+        .chain-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+
+        .chain-type {
+            color: var(--cyan);
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+        .chain-multiplier {
+            color: var(--gold);
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+        .chain-desc {
+            color: rgba(168, 170, 255, 0.95);
+            font-size: 12px;
+        }
+
+        .stacked-list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .stacked-item {
+            padding: 8px 12px;
+            background: rgba(99, 102, 241, 0.08);
+            border-left: 3px solid var(--purple);
+            border-radius: 4px;
+            font-size: 13px;
+            line-height: 1.5;
+            transition: all 0.15s ease;
+        }
+
+        .stacked-item:hover {
+            background: rgba(99, 102, 241, 0.12);
+            border-left-color: var(--purple);
+        }
+
+        .stacked-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+
+        .stacked-room {
+            color: var(--purple);
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+        .stacked-count {
+            color: var(--text-muted);
+            font-size: 12px;
+        }
+
+        .stacked-values {
+            display: flex;
+            gap: 15px;
+            margin-top: 5px;
+            font-size: 12px;
+        }
+
+        .stacked-values span {
+            color: rgba(168, 170, 255, 0.95);
+        }
+
+        .stacked-values strong {
+            color: var(--text);
+        }
+
+        .progress-bar-container {
+            margin-top: 10px;
+            padding: 0;
+        }
+
+        .progress-bar-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+
+        .risk-reward-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .risk-reward-card {
+            background: var(--bg-cell);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 12px;
+            text-align: center;
+            transition: all 0.15s ease;
+        }
+
+        .risk-reward-card:hover {
+            border-color: var(--border-gold);
+            background: var(--bg-hover);
+        }
+
+        .risk-reward-label {
+            font-size: 11px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+        }
+
+        .risk-reward-value {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .recommendation-box {
+            background: rgba(99, 102, 241, 0.08);
+            border-left: 3px solid var(--cyan);
+            border-radius: 4px;
+            padding: 10px 12px;
+            margin-top: 12px;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .recommendation-box p {
+            color: rgba(168, 170, 255, 0.95);
+            margin: 0;
+        }
+
+        @media (max-width: 768px) {
+            .risk-reward-grid {
+                grid-template-columns: 1fr;
+            }
         }
         
         .criteria-item {
@@ -383,6 +685,247 @@
         
         .error-message.visible {
             display: block;
+        }
+
+        /* Room Details Section Styles */
+        .rooms-section {
+            background: var(--bg-panel);
+            border-radius: 12px;
+            padding: 25px;
+            border: 1px solid var(--border);
+            margin-top: 20px;
+        }
+
+        .rooms-section h3 {
+            color: var(--gold-light);
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .rooms-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 15px;
+        }
+
+        .room-card {
+            background: var(--bg-cell);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 15px;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .room-card:hover {
+            border-color: var(--gold);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(160, 128, 80, 0.2);
+        }
+
+        .room-card.tier-7 { border-left: 3px solid var(--purple); }
+        .room-card.tier-6 { border-left: 3px solid var(--gold); }
+        .room-card.tier-5 { border-left: 3px solid var(--orange); }
+        .room-card.tier-4 { border-left: 3px solid var(--blue); }
+        .room-card.tier-3 { border-left: 3px solid var(--green); }
+        .room-card.tier-2 { border-left: 3px solid var(--cyan); }
+        .room-card.tier-1 { border-left: 3px solid var(--text-muted); }
+        .room-card.special { border-left: 3px solid var(--red); }
+        .room-card.boss { border-left: 3px solid #ff4444; }
+        .room-card.architect { border-left: 3px solid var(--cyan); }
+
+        .room-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 10px;
+        }
+
+        .room-icon {
+            font-size: 24px;
+            margin-right: 8px;
+        }
+
+        .room-name {
+            font-weight: 600;
+            color: var(--text);
+            font-size: 14px;
+            flex: 1;
+        }
+
+        .room-tier {
+            background: var(--bg-dark);
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--gold);
+        }
+
+        .room-tier.tier-7 { color: var(--purple); }
+        .room-tier.tier-6 { color: var(--gold); }
+        .room-tier.tier-5 { color: var(--orange); }
+
+        .room-position {
+            font-size: 11px;
+            color: var(--text-dim);
+            margin-bottom: 8px;
+        }
+
+        .room-effects {
+            font-size: 12px;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        .room-effect-item {
+            display: flex;
+            align-items: start;
+            gap: 6px;
+            margin-bottom: 4px;
+        }
+
+        .room-effect-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .effect-bullet {
+            color: var(--gold);
+            font-size: 8px;
+            margin-top: 3px;
+        }
+
+        .room-type-badge {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
+
+        .room-type-badge.reward { background: rgba(160, 128, 80, 0.2); color: var(--gold); }
+        .room-type-badge.special { background: rgba(248, 113, 113, 0.2); color: var(--red); }
+        .room-type-badge.boss { background: rgba(255, 68, 68, 0.2); color: #ff4444; }
+        .room-type-badge.architect { background: rgba(34, 211, 238, 0.2); color: var(--cyan); }
+        .room-type-badge.path { background: rgba(136, 136, 136, 0.2); color: var(--text-muted); }
+        .room-type-badge.empty { background: rgba(85, 85, 85, 0.2); color: var(--text-dim); }
+
+        .room-card.expanded .room-details {
+            display: block;
+        }
+
+        .room-details {
+            display: none;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid var(--border);
+        }
+
+        .room-detail-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            margin-bottom: 4px;
+        }
+
+        .room-detail-label {
+            color: var(--text-muted);
+        }
+
+        .room-detail-value {
+            color: var(--gold);
+            font-weight: 500;
+        }
+
+        .room-loot-modifiers {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+            margin-top: 8px;
+        }
+
+        .loot-modifier-tag {
+            background: var(--bg-dark);
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 10px;
+            color: var(--text-muted);
+        }
+
+        .loot-modifier-tag.positive { color: var(--green); }
+        .loot-modifier-tier { color: var(--gold); }
+
+        .filter-buttons {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            background: var(--bg-cell);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 6px 12px;
+            font-size: 12px;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .filter-btn:hover {
+            border-color: var(--gold);
+            color: var(--text);
+        }
+
+        .filter-btn.active {
+            background: rgba(160, 128, 80, 0.2);
+            border-color: var(--gold);
+            color: var(--gold-light);
+        }
+
+        .room-stats-summary {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 15px;
+            padding: 12px;
+            background: var(--bg-cell);
+            border-radius: 8px;
+            flex-wrap: wrap;
+        }
+
+        .room-stat {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .room-stat-value {
+            color: var(--gold);
+            font-weight: 600;
+        }
+
+        @media (max-width: 600px) {
+            .rooms-grid {
+                grid-template-columns: 1fr;
+            }
+            .filter-buttons {
+                gap: 6px;
+            }
+            .filter-btn {
+                padding: 5px 10px;
+                font-size: 11px;
+            }
         }
     </style>
 </head>
@@ -482,6 +1025,171 @@
                     </div>
                     <div class="criteria-desc">Based on total reward rooms (18+ rooms = 15pts)</div>
                 </div>
+            </div>
+
+            <div class="evaluation-section" id="chainedBonusesSection" style="display: none;">
+                <div class="evaluation-header" onclick="toggleSection('chainedBonuses')">
+                    <h3>🔗 Chained Room Bonuses</h3>
+                    <span class="toggle-icon" id="chainedBonusesIcon">▼</span>
+                </div>
+                <div class="evaluation-content" id="chainedBonusesContent">
+                    <p style="color: var(--text-muted); margin-bottom: 15px;">Connected high-tier rooms provide multipliers (15% per room in chain)</p>
+                    <ul class="chain-list" id="chainedBonusesList"></ul>
+                </div>
+            </div>
+
+            <div class="evaluation-section" id="stackedBonusesSection" style="display: none;">
+                <div class="evaluation-header" onclick="toggleSection('stackedBonuses')">
+                    <h3>📚 Stacked Bonuses (Diminishing Returns)</h3>
+                    <span class="toggle-icon" id="stackedBonusesIcon">▼</span>
+                </div>
+                <div class="evaluation-content" id="stackedBonusesContent">
+                    <p style="color: var(--text-muted); margin-bottom: 15px;">Duplicate valuable rooms with 30% diminishing returns per additional room</p>
+                    <ul class="stacked-list" id="stackedBonusesList"></ul>
+                </div>
+            </div>
+
+            <div class="evaluation-section" id="monsterScalingSection" style="display: none;">
+                <div class="evaluation-header" onclick="toggleSection('monsterScaling')">
+                    <h3>⚔️ Monster Scaling</h3>
+                    <span class="toggle-icon" id="monsterScalingIcon">▼</span>
+                </div>
+                <div class="evaluation-content" id="monsterScalingContent">
+                    <div class="metric-row">
+                        <span class="metric-label">Difficulty Level</span>
+                        <span class="metric-value" id="monsterDifficulty"></span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Average Tier</span>
+                        <span class="metric-value" id="avgTier"></span>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar-label">
+                            <span>Monster Density</span>
+                            <span id="monsterDensityValue">0%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="monsterDensityBar" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar-label">
+                            <span>Rare Monster Chance</span>
+                            <span id="rareChanceValue">0%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="rareChanceBar" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Boss Present</span>
+                        <span class="metric-value" id="bossPresent"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="evaluation-section" id="lootModifiersSection" style="display: none;">
+                <div class="evaluation-header" onclick="toggleSection('lootModifiers')">
+                    <h3>💎 Loot Modifiers</h3>
+                    <span class="toggle-icon" id="lootModifiersIcon">▼</span>
+                </div>
+                <div class="evaluation-content" id="lootModifiersContent">
+                    <div class="metric-row">
+                        <span class="metric-label">Currency Multiplier</span>
+                        <span class="metric-value gold" id="currencyMultiplier"></span>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar-label">
+                            <span>Rare Item Chance</span>
+                            <span id="rareItemValue">0%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="rareItemBar" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar-label">
+                            <span>Unique Item Chance</span>
+                            <span id="uniqueItemValue">0%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="uniqueItemBar" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Corruption Available</span>
+                        <span class="metric-value" id="corruptionAvailable"></span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Sacrifice Value</span>
+                        <span class="metric-value purple" id="sacrificeValue"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="evaluation-section" id="farmingSection" style="display: none;">
+                <div class="evaluation-header" onclick="toggleSection('farming')">
+                    <h3>🌾 Farming Assessment</h3>
+                    <span class="toggle-icon" id="farmingIcon">▼</span>
+                </div>
+                <div class="evaluation-content" id="farmingContent">
+                    <div class="metric-row">
+                        <span class="metric-label">Currency Farming</span>
+                        <span class="metric-value" id="currencyFarming"></span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Rare Monster Farming</span>
+                        <span class="metric-value" id="rareMonsterFarming"></span>
+                    </div>
+                    <div class="metric-row">
+                        <span class="metric-label">Item Farming</span>
+                        <span class="metric-value" id="itemFarming"></span>
+                    </div>
+                    <div class="recommendation-box">
+                        <p id="farmingRecommendation" style="color: var(--cyan);"></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="evaluation-section" id="riskRewardSection" style="display: none;">
+                <div class="evaluation-header" onclick="toggleSection('riskReward')">
+                    <h3>⚖️ Risk vs Reward</h3>
+                    <span class="toggle-icon" id="riskRewardIcon">▼</span>
+                </div>
+                <div class="evaluation-content" id="riskRewardContent">
+                    <div class="risk-reward-grid">
+                        <div class="risk-reward-card">
+                            <div class="risk-reward-label">Risk Level</div>
+                            <div class="risk-reward-value" id="riskLevel"></div>
+                        </div>
+                        <div class="risk-reward-card">
+                            <div class="risk-reward-label">Reward Potential</div>
+                            <div class="risk-reward-value" id="rewardPotential"></div>
+                        </div>
+                        <div class="risk-reward-card">
+                            <div class="risk-reward-label">Time Investment</div>
+                            <div class="risk-reward-value" id="timeInvestment"></div>
+                        </div>
+                    </div>
+                    <div class="recommendation-box">
+                        <p id="riskRecommendation"></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="rooms-section" id="roomsSection" style="display: none;">
+                <h3>🏛️ Temple Rooms Details</h3>
+                <div class="room-stats-summary" id="roomStatsSummary"></div>
+                <div class="filter-buttons" id="filterButtons">
+                    <button class="filter-btn active" data-filter="all">All Rooms</button>
+                    <button class="filter-btn" data-filter="reward">Reward Rooms</button>
+                    <button class="filter-btn" data-filter="special">Special</button>
+                    <button class="filter-btn" data-filter="boss">Boss</button>
+                    <button class="filter-btn" data-filter="architect">Architect</button>
+                    <button class="filter-btn" data-filter="tier-7">Tier 7</button>
+                    <button class="filter-btn" data-filter="tier-6">Tier 6+</button>
+                </div>
+                <div class="rooms-grid" id="roomsGrid"></div>
             </div>
         </div>
     </div>
@@ -590,6 +1298,402 @@
 
             // Unknown
             'unknown': { type: 'unknown', baseValue: 1, highTierBonus: false },
+        };
+
+        // Room effects and descriptions
+        const ROOM_EFFECTS = {
+            'viper_spymaster': {
+                icon: '🐍',
+                name: 'Viper Spymaster',
+                nameVi: 'Chỉ Huy Rắn Độc',
+                effects: [
+                    'Increases rare monster spawn rate',
+                    'Adds additional loot from rare monsters',
+                    'Enhances monster pack size'
+                ],
+                effectsVi: [
+                    'Tăng tỷ lệ xuất hiện quái hiếm',
+                    'Thêm phần thưởng từ quái hiếm',
+                    'Tăng kích thước đàn quái'
+                ],
+                monsterScaling: 'High density, more rare monsters',
+                lootMods: '+15-30% rare monster chance per tier'
+            },
+            'golem_works': {
+                icon: '🗿',
+                name: 'Golem Works',
+                nameVi: 'Xưởng Golem',
+                effects: [
+                    'Spawns powerful golems',
+                    'Increases item rarity',
+                    'Adds unique item drops'
+                ],
+                effectsVi: [
+                    'Triệu hồi golem mạnh mẽ',
+                    'Tăng độ hiếm vật phẩm',
+                    'Thêm vật phẩm độc nhất'
+                ],
+                monsterScaling: 'Elite golems with high HP',
+                lootMods: '+10-20% unique item chance per tier'
+            },
+            'vault': {
+                icon: '💰',
+                name: 'Vault',
+                nameVi: 'Kho Báu',
+                effects: [
+                    'Massive currency rewards',
+                    'Increased currency drop rate',
+                    'Stacks of valuable currency'
+                ],
+                effectsVi: [
+                    'Phần thưởng tiền tệ khổng lồ',
+                    'Tăng tỷ lệ rơi tiền tệ',
+                    'Nhiều tiền tệ giá trị'
+                ],
+                monsterScaling: 'Standard density',
+                lootMods: '+25-50% currency multiplier per tier'
+            },
+            'corruption': {
+                icon: '⚡',
+                name: 'Corruption Chamber',
+                nameVi: 'Phòng Tha Hóa',
+                effects: [
+                    'Corrupts items for powerful mods',
+                    'Risk/reward mechanic',
+                    'Can brick or enhance items'
+                ],
+                effectsVi: [
+                    'Tha hóa vật phẩm để có thuộc tính mạnh',
+                    'Cơ chế rủi ro/phần thưởng',
+                    'Có thể phá hoặc nâng cấp vật phẩm'
+                ],
+                monsterScaling: 'N/A - Utility room',
+                lootMods: 'Corruption altar available'
+            },
+            'sacrifice': {
+                icon: '🔥',
+                name: 'Sacrifice Chamber',
+                nameVi: 'Phòng Hiến Tế',
+                effects: [
+                    'Sacrifice items for rewards',
+                    'Higher tier = better rewards',
+                    'Unique sacrifice outcomes'
+                ],
+                effectsVi: [
+                    'Hiến tế vật phẩm để nhận thưởng',
+                    'Cấp cao hơn = thưởng tốt hơn',
+                    'Kết quả hiến tế độc đáo'
+                ],
+                monsterScaling: 'N/A - Utility room',
+                lootMods: 'Sacrifice value scales with tier'
+            },
+            'reward_currency': {
+                icon: '💎',
+                name: 'Currency Room',
+                nameVi: 'Phòng Tiền Tệ',
+                effects: [
+                    'Guaranteed currency drops',
+                    'High-value currency types',
+                    'Scales with room tier'
+                ],
+                effectsVi: [
+                    'Đảm bảo rơi tiền tệ',
+                    'Loại tiền tệ giá trị cao',
+                    'Tăng theo cấp phòng'
+                ],
+                monsterScaling: 'Standard density',
+                lootMods: '+20-40% currency per tier'
+            },
+            'alchemy_lab': {
+                icon: '⚗️',
+                name: 'Alchemy Lab',
+                nameVi: 'Phòng Giả Kim',
+                effects: [
+                    'Alchemy currency rewards',
+                    'Crafting material drops',
+                    'Quality enhancement items'
+                ],
+                effectsVi: [
+                    'Phần thưởng tiền tệ giả kim',
+                    'Rơi nguyên liệu chế tạo',
+                    'Vật phẩm nâng cấp chất lượng'
+                ],
+                monsterScaling: 'Moderate density',
+                lootMods: '+15-25% crafting materials per tier'
+            },
+            'flesh_surgeon': {
+                icon: '🩸',
+                name: 'Flesh Surgeon',
+                nameVi: 'Bác Sĩ Xẻ Thịt',
+                effects: [
+                    'Life flask rewards',
+                    'Healing item drops',
+                    'Increased flask quality'
+                ],
+                effectsVi: [
+                    'Phần thưởng bình máu',
+                    'Rơi vật phẩm hồi máu',
+                    'Tăng chất lượng bình'
+                ],
+                monsterScaling: 'Moderate density',
+                lootMods: '+10-20% flask quality per tier'
+            },
+            'synthflesh': {
+                icon: '🧬',
+                name: 'Synthflesh',
+                nameVi: 'Thịt Tổng Hợp',
+                effects: [
+                    'Synthesized item rewards',
+                    'Unique mod combinations',
+                    'High-value crafting bases'
+                ],
+                effectsVi: [
+                    'Phần thưởng vật phẩm tổng hợp',
+                    'Kết hợp thuộc tính độc đáo',
+                    'Nền chế tạo giá trị cao'
+                ],
+                monsterScaling: 'Moderate density',
+                lootMods: '+15-30% synthesized items per tier'
+            },
+            'armoury': {
+                icon: '🛡️',
+                name: 'Armoury',
+                nameVi: 'Kho Vũ Khí',
+                effects: [
+                    'Weapon and armor drops',
+                    'Increased item level',
+                    'Quality armaments'
+                ],
+                effectsVi: [
+                    'Rơi vũ khí và giáp',
+                    'Tăng cấp độ vật phẩm',
+                    'Trang bị chất lượng'
+                ],
+                monsterScaling: 'Moderate density',
+                lootMods: '+10-15% item level per tier'
+            },
+            'garrison': {
+                icon: '⚔️',
+                name: 'Garrison',
+                nameVi: 'Đồn Trú',
+                effects: [
+                    'Military-themed rewards',
+                    'Increased monster packs',
+                    'Combat-focused loot'
+                ],
+                effectsVi: [
+                    'Phần thưởng chủ đề quân sự',
+                    'Tăng đàn quái',
+                    'Phần thưởng tập trung chiến đấu'
+                ],
+                monsterScaling: 'High density',
+                lootMods: '+15-25% pack size per tier'
+            },
+            'generator': {
+                icon: '⚙️',
+                name: 'Generator',
+                nameVi: 'Máy Phát',
+                effects: [
+                    'Energy-based rewards',
+                    'Mechanical loot',
+                    'Utility items'
+                ],
+                effectsVi: [
+                    'Phần thưởng dựa trên năng lượng',
+                    'Phần thưởng cơ khí',
+                    'Vật phẩm tiện ích'
+                ],
+                monsterScaling: 'Moderate density',
+                lootMods: '+10-20% utility items per tier'
+            },
+            'smithy': {
+                icon: '🔨',
+                name: 'Smithy',
+                nameVi: 'Lò Rèn',
+                effects: [
+                    'Crafting currency',
+                    'Blacksmith items',
+                    'Quality enhancement'
+                ],
+                effectsVi: [
+                    'Tiền tệ chế tạo',
+                    'Vật phẩm thợ rèn',
+                    'Nâng cấp chất lượng'
+                ],
+                monsterScaling: 'Moderate density',
+                lootMods: '+15-25% quality items per tier'
+            },
+            'thaumaturge': {
+                icon: '🔮',
+                name: 'Thaumaturge',
+                nameVi: 'Pháp Sư',
+                effects: [
+                    'Magic item rewards',
+                    'Spell-based loot',
+                    'Increased magic find'
+                ],
+                effectsVi: [
+                    'Phần thưởng vật phẩm phép thuật',
+                    'Phần thưởng dựa trên phép',
+                    'Tăng tìm kiếm phép thuật'
+                ],
+                monsterScaling: 'Moderate density',
+                lootMods: '+15-30% magic items per tier'
+            },
+            'transcendent_barracks': {
+                icon: '🏰',
+                name: 'Transcendent Barracks',
+                nameVi: 'Doanh Trại Siêu Việt',
+                effects: [
+                    'Elite soldier spawns',
+                    'Military rewards',
+                    'High-tier equipment'
+                ],
+                effectsVi: [
+                    'Triệu hồi lính tinh nhuệ',
+                    'Phần thưởng quân sự',
+                    'Trang bị cấp cao'
+                ],
+                monsterScaling: 'High density, elite monsters',
+                lootMods: '+20-35% elite drops per tier'
+            },
+            'viper_legion_barracks': {
+                icon: '🐉',
+                name: 'Viper Legion Barracks',
+                nameVi: 'Doanh Trại Quân Đoàn Rắn',
+                effects: [
+                    'Viper legion spawns',
+                    'Poison-themed rewards',
+                    'Chaos damage items'
+                ],
+                effectsVi: [
+                    'Triệu hồi quân đoàn rắn',
+                    'Phần thưởng chủ đề độc',
+                    'Vật phẩm sát thương hỗn loạn'
+                ],
+                monsterScaling: 'High density, poison monsters',
+                lootMods: '+15-30% chaos items per tier'
+            },
+            'reward_room': {
+                icon: '🎁',
+                name: 'Reward Room',
+                nameVi: 'Phòng Phần Thưởng',
+                effects: [
+                    'General rewards',
+                    'Mixed loot types',
+                    'Balanced drops'
+                ],
+                effectsVi: [
+                    'Phần thưởng chung',
+                    'Nhiều loại phần thưởng',
+                    'Rơi cân bằng'
+                ],
+                monsterScaling: 'Standard density',
+                lootMods: '+10-20% general loot per tier'
+            },
+            'boss': {
+                icon: '👹',
+                name: 'Boss Room',
+                nameVi: 'Phòng Boss',
+                effects: [
+                    'Temple boss encounter',
+                    'Guaranteed unique drops',
+                    'High-value rewards'
+                ],
+                effectsVi: [
+                    'Gặp boss đền thờ',
+                    'Đảm bảo rơi vật phẩm độc nhất',
+                    'Phần thưởng giá trị cao'
+                ],
+                monsterScaling: 'Boss fight - very high difficulty',
+                lootMods: 'Boss-specific unique items'
+            },
+            'atziri': {
+                icon: '👑',
+                name: 'Atziri Boss',
+                nameVi: 'Boss Atziri',
+                effects: [
+                    'Atziri encounter',
+                    'Exclusive unique items',
+                    'Endgame rewards'
+                ],
+                effectsVi: [
+                    'Gặp Atziri',
+                    'Vật phẩm độc nhất độc quyền',
+                    'Phần thưởng cuối game'
+                ],
+                monsterScaling: 'Endgame boss - extreme difficulty',
+                lootMods: 'Atziri-specific uniques'
+            },
+            'architect': {
+                icon: '👤',
+                name: 'Architect',
+                nameVi: 'Kiến Trúc Sư',
+                effects: [
+                    'Architect encounter',
+                    'Room upgrade opportunity',
+                    'Tier advancement'
+                ],
+                effectsVi: [
+                    'Gặp kiến trúc sư',
+                    'Cơ hội nâng cấp phòng',
+                    'Tiến bộ cấp độ'
+                ],
+                monsterScaling: 'Mini-boss encounter',
+                lootMods: 'Room modification rewards'
+            },
+            'commander': {
+                icon: '⚜️',
+                name: 'Commander',
+                nameVi: 'Chỉ Huy',
+                effects: [
+                    'Commander encounter',
+                    'Leadership rewards',
+                    'Strategic loot'
+                ],
+                effectsVi: [
+                    'Gặp chỉ huy',
+                    'Phần thưởng lãnh đạo',
+                    'Phần thưởng chiến lược'
+                ],
+                monsterScaling: 'Elite encounter',
+                lootMods: 'Commander-specific drops'
+            },
+            'sacrificial_chamber': {
+                icon: '🗡️',
+                name: 'Sacrificial Chamber',
+                nameVi: 'Phòng Hiến Tế',
+                effects: [
+                    'Sacrifice mechanics',
+                    'Risk/reward system',
+                    'Powerful outcomes'
+                ],
+                effectsVi: [
+                    'Cơ chế hiến tế',
+                    'Hệ thống rủi ro/thưởng',
+                    'Kết quả mạnh mẽ'
+                ],
+                monsterScaling: 'N/A - Utility room',
+                lootMods: 'Sacrifice-based rewards'
+            },
+            'empty': {
+                icon: '⬜',
+                name: 'Empty',
+                nameVi: 'Trống',
+                effects: ['No special effects'],
+                effectsVi: ['Không có hiệu ứng đặc biệt'],
+                monsterScaling: 'N/A',
+                lootMods: 'None'
+            },
+            'path': {
+                icon: '🚶',
+                name: 'Path',
+                nameVi: 'Lối Đi',
+                effects: ['Connects rooms'],
+                effectsVi: ['Kết nối các phòng'],
+                monsterScaling: 'N/A',
+                lootMods: 'None'
+            }
         };
 
         function validateShareURL(url) {
@@ -701,6 +1805,187 @@
             }
         }
         
+        // Temple Evaluation Functions
+        function analyzeChainedRooms(rooms) {
+            const bonuses = [];
+            const highTierRooms = rooms.filter(r => (r.tier || 0) >= 6);
+            const visited = new Set();
+
+            highTierRooms.forEach(room => {
+                const key = `${room.x},${room.y}`;
+                if (visited.has(key)) return;
+
+                const chain = findConnectedChain(highTierRooms, room, visited);
+                if (chain.length >= 3) {
+                    const avgTier = chain.reduce((sum, r) => sum + (r.tier || 0), 0) / chain.length;
+                    bonuses.push({
+                        type: 'high_tier_chain',
+                        description: `${chain.length} connected T${Math.floor(avgTier)}+ rooms`,
+                        rooms: chain,
+                        multiplier: 1 + chain.length * 0.15
+                    });
+                }
+            });
+
+            return bonuses;
+        }
+
+        function findConnectedChain(rooms, start, visited) {
+            const chain = [start];
+            visited.add(`${start.x},${start.y}`);
+
+            rooms.forEach(room => {
+                const key = `${room.x},${room.y}`;
+                if (visited.has(key)) return;
+
+                const isAdjacent = Math.abs(room.x - start.x) <= 1 && Math.abs(room.y - start.y) <= 1;
+                if (isAdjacent) {
+                    chain.push(...findConnectedChain(rooms, room, visited));
+                }
+            });
+
+            return chain;
+        }
+
+        function analyzeStackedBonuses(rooms) {
+            const bonuses = [];
+            const roomCounts = new Map();
+
+            rooms.forEach(room => {
+                if (room.room && room.room !== 'empty' && room.room !== 'path') {
+                    roomCounts.set(room.room, (roomCounts.get(room.room) || 0) + 1);
+                }
+            });
+
+            const valuableRooms = ['golem_works', 'viper_spymaster', 'thaumaturge'];
+            valuableRooms.forEach(roomType => {
+                const count = roomCounts.get(roomType) || 0;
+                if (count > 0) {
+                    const baseValue = 100;
+                    const drFactor = count > 1 ? Math.pow(0.7, count - 1) : 1;
+                    const actualValue = baseValue * count * drFactor;
+                    const drPercent = count > 1 ? (1 - drFactor) * 100 : 0;
+
+                    bonuses.push({
+                        roomType,
+                        count,
+                        baseValue,
+                        actualValue: Math.round(actualValue),
+                        diminishingReturn: Math.round(drPercent)
+                    });
+                }
+            });
+
+            return bonuses;
+        }
+
+        function analyzeMonsterScaling(rooms) {
+            const rewardRooms = rooms.filter(r => r.room !== 'empty' && r.room !== 'path');
+            const avgTier = rewardRooms.reduce((sum, r) => sum + (r.tier || 0), 0) / (rewardRooms.length || 1);
+
+            const t7Count = rooms.filter(r => (r.tier || 0) >= 7).length;
+            const t6Count = rooms.filter(r => (r.tier || 0) === 6).length;
+            const bossPresent = rooms.some(r => r.room === 'boss' || r.room === 'atziri');
+
+            let difficulty = 'Easy';
+            if (avgTier >= 6.5 || t7Count >= 3) difficulty = 'Extreme';
+            else if (avgTier >= 6 || t7Count >= 2) difficulty = 'Very Hard';
+            else if (avgTier >= 5 || t6Count >= 4) difficulty = 'Hard';
+            else if (avgTier >= 4) difficulty = 'Moderate';
+
+            const monsterDensity = Math.min(100, (rewardRooms.length / 25) * 100 + avgTier * 5);
+            const rareMonsterChance = Math.min(100, avgTier * 12 + t7Count * 10);
+
+            return {
+                averageTier: Math.round(avgTier * 10) / 10,
+                difficulty,
+                monsterDensity: Math.round(monsterDensity),
+                rareMonsterChance: Math.round(rareMonsterChance),
+                bossPresent
+            };
+        }
+
+        function analyzeLootModifiers(rooms) {
+            const t7Count = rooms.filter(r => (r.tier || 0) >= 7).length;
+            const t6Count = rooms.filter(r => (r.tier || 0) === 6).length;
+            const hasCorruption = rooms.some(r => r.room === 'corruption');
+            const hasSacrifice = rooms.some(r => r.room === 'sacrifice' || r.room === 'sacrificial_chamber');
+            const currencyRooms = rooms.filter(r => r.room === 'reward_currency' || r.room === 'vault').length;
+
+            const currencyMultiplier = 1 + t7Count * 0.3 + t6Count * 0.15 + currencyRooms * 0.25;
+            const rareItemChance = Math.min(100, 20 + t7Count * 15 + t6Count * 8);
+            const uniqueItemChance = Math.min(50, 5 + t7Count * 8 + t6Count * 3);
+            const sacrificeValue = hasSacrifice ? (t7Count + t6Count) * 10 : 0;
+
+            return {
+                currencyMultiplier: Math.round(currencyMultiplier * 100) / 100,
+                rareItemChance: Math.round(rareItemChance),
+                uniqueItemChance: Math.round(uniqueItemChance),
+                corruptionAvailable: hasCorruption,
+                sacrificeValue
+            };
+        }
+
+        function assessFarming(loot, scaling) {
+            const ratings = ['Poor', 'Fair', 'Good', 'Excellent', 'Outstanding'];
+
+            const currencyRating = loot.currencyMultiplier >= 2.5 ? 4 : loot.currencyMultiplier >= 2.0 ? 3 : loot.currencyMultiplier >= 1.5 ? 2 : loot.currencyMultiplier >= 1.2 ? 1 : 0;
+            const rareScore = (scaling.rareMonsterChance + scaling.monsterDensity) / 2;
+            const rareRating = rareScore >= 80 ? 4 : rareScore >= 60 ? 3 : rareScore >= 40 ? 2 : rareScore >= 20 ? 1 : 0;
+            const itemScore = loot.rareItemChance + loot.uniqueItemChance;
+            const itemRating = itemScore >= 100 ? 4 : itemScore >= 70 ? 3 : itemScore >= 40 ? 2 : itemScore >= 20 ? 1 : 0;
+
+            const suitability = currencyRating >= 3 && rareRating >= 3 ? 'Excellent all-around farming temple' :
+                currencyRating >= 3 ? 'Best for currency farming' :
+                rareRating >= 3 ? 'Best for rare monster farming' :
+                itemRating >= 3 ? 'Best for item farming' : 'Moderate farming potential';
+
+            return {
+                currencyFarming: ratings[currencyRating],
+                rareMonsterFarming: ratings[rareRating],
+                itemFarming: ratings[itemRating],
+                overallSuitability: suitability
+            };
+        }
+
+        function analyzeRiskReward(scaling, loot, rooms) {
+            const riskLevels = ['Low', 'Medium', 'High', 'Very High', 'Extreme'];
+            const rewardLevels = ['Low', 'Medium', 'High', 'Very High', 'Exceptional'];
+
+            let riskIndex = scaling.difficulty === 'Easy' ? 0 : scaling.difficulty === 'Moderate' ? 1 : scaling.difficulty === 'Hard' ? 2 : scaling.difficulty === 'Very Hard' ? 3 : 4;
+            if (scaling.bossPresent) riskIndex = Math.min(4, riskIndex + 1);
+
+            const rewardScore = loot.currencyMultiplier + loot.rareItemChance / 50 + loot.uniqueItemChance / 25;
+            const rewardIndex = rewardScore >= 4.5 ? 4 : rewardScore >= 3.5 ? 3 : rewardScore >= 2.5 ? 2 : rewardScore >= 1.5 ? 1 : 0;
+
+            const roomCount = rooms.filter(r => r.room !== 'empty' && r.room !== 'path').length;
+            const timeInvestment = roomCount >= 20 && riskIndex >= 3 ? 'Very Long' : roomCount >= 15 || riskIndex >= 3 ? 'Long' : roomCount >= 10 ? 'Moderate' : 'Quick';
+
+            const recommendation = rewardIndex > riskIndex + 1 ? 'Highly recommended - great rewards for the risk' :
+                rewardIndex > riskIndex ? 'Recommended - good risk/reward balance' :
+                rewardIndex === riskIndex ? 'Balanced - moderate risk and reward' :
+                'Challenging - high risk, consider your build strength';
+
+            return {
+                riskLevel: riskLevels[riskIndex],
+                rewardPotential: rewardLevels[rewardIndex],
+                recommendation,
+                timeInvestment
+            };
+        }
+
+        function evaluateTemple(templeData) {
+            const rooms = templeData.rooms || [];
+            return {
+                chainedBonuses: analyzeChainedRooms(rooms),
+                stackedBonuses: analyzeStackedBonuses(rooms),
+                monsterScaling: analyzeMonsterScaling(rooms),
+                lootModifiers: analyzeLootModifiers(rooms),
+                farmingAssessment: assessFarming(analyzeLootModifiers(rooms), analyzeMonsterScaling(rooms)),
+                riskReward: analyzeRiskReward(analyzeMonsterScaling(rooms), analyzeLootModifiers(rooms), rooms)
+            };
+        }
+
         function analyzeTempleData(templeData) {
             const allRooms = templeData.rooms || [];
 
@@ -924,12 +2209,250 @@
             return html;
         }
         
+        function toggleSection(sectionName) {
+            const content = document.getElementById(sectionName + 'Content');
+            const icon = document.getElementById(sectionName + 'Icon');
+
+            if (content.classList.contains('open')) {
+                content.classList.remove('open');
+                icon.classList.remove('open');
+            } else {
+                content.classList.add('open');
+                icon.classList.add('open');
+            }
+        }
+
+        // Render all rooms with their details
+        function renderRooms(rooms) {
+            const roomsSection = document.getElementById('roomsSection');
+            const roomsGrid = document.getElementById('roomsGrid');
+            const roomStatsSummary = document.getElementById('roomStatsSummary');
+
+            if (!rooms || rooms.length === 0) {
+                roomsSection.style.display = 'none';
+                return;
+            }
+
+            roomsSection.style.display = 'block';
+            roomsGrid.innerHTML = '';
+            roomStatsSummary.innerHTML = '';
+
+            // Calculate stats
+            const stats = {
+                total: rooms.length,
+                tier7: 0,
+                tier6: 0,
+                rewardRooms: 0,
+                specialRooms: 0,
+                bossRooms: 0,
+                architectRooms: 0
+            };
+
+            rooms.forEach(room => {
+                const tier = room.tier || 0;
+                if (tier >= 7) stats.tier7++;
+                if (tier >= 6) stats.tier6++;
+
+                const roomType = ROOM_TYPES[room.room] || { type: 'unknown' };
+                if (roomType.type === 'reward') stats.rewardRooms++;
+                if (roomType.type === 'special') stats.specialRooms++;
+                if (roomType.type === 'boss') stats.bossRooms++;
+                if (roomType.type === 'architect') stats.architectRooms++;
+            });
+
+            // Render stats
+            roomStatsSummary.innerHTML = `
+                <div class="room-stat"><span>Total Rooms:</span> <span class="room-stat-value">${stats.total}</span></div>
+                <div class="room-stat"><span>Tier 7:</span> <span class="room-stat-value">${stats.tier7}</span></div>
+                <div class="room-stat"><span>Tier 6+:</span> <span class="room-stat-value">${stats.tier6}</span></div>
+                <div class="room-stat"><span>Reward Rooms:</span> <span class="room-stat-value">${stats.rewardRooms}</span></div>
+                <div class="room-stat"><span>Special:</span> <span class="room-stat-value">${stats.specialRooms}</span></div>
+                <div class="room-stat"><span>Boss:</span> <span class="room-stat-value">${stats.bossRooms}</span></div>
+                <div class="room-stat"><span>Architects:</span> <span class="room-stat-value">${stats.architectRooms}</span></div>
+            `;
+
+            // Render room cards
+            rooms.forEach(room => {
+                const effectData = ROOM_EFFECTS[room.room] || {
+                    icon: '❓',
+                    name: room.room.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+                    nameVi: room.room,
+                    effects: ['Unknown effects'],
+                    effectsVi: ['Hiệu ứng không xác định'],
+                    monsterScaling: 'Unknown',
+                    lootMods: 'Unknown'
+                };
+
+                const roomType = ROOM_TYPES[room.room] || { type: 'unknown' };
+                const tier = room.tier || 0;
+                const tierClass = tier >= 7 ? 'tier-7' : tier >= 6 ? 'tier-6' : tier >= 5 ? 'tier-5' : tier >= 4 ? 'tier-4' : tier >= 3 ? 'tier-3' : tier >= 2 ? 'tier-2' : 'tier-1';
+
+                const card = document.createElement('div');
+                card.className = `room-card ${tierClass} ${roomType.type}`;
+                card.dataset.filter = roomType.type;
+                card.dataset.tier = tier;
+                card.dataset.roomName = room.room;
+
+                const effectsList = effectData.effects.map((effect, i) =>
+                    `<div class="room-effect-item"><span class="effect-bullet">●</span><span>${effect}</span></div>`
+                ).join('');
+
+                card.innerHTML = `
+                    <span class="room-type-badge ${roomType.type}">${roomType.type}</span>
+                    <div class="room-card-header">
+                        <div style="display: flex; align-items: center; flex: 1;">
+                            <span class="room-icon">${effectData.icon}</span>
+                            <span class="room-name">${effectData.name}</span>
+                        </div>
+                        <span class="room-tier ${tierClass}">T${tier}</span>
+                    </div>
+                    <div class="room-position">Position: (${room.x}, ${room.y})</div>
+                    <div class="room-effects">
+                        ${effectsList}
+                    </div>
+                    <div class="room-loot-modifiers">
+                        <span class="loot-modifier-tag loot-modifier-tier">T${tier}</span>
+                        <span class="loot-modifier-tag">${effectData.monsterScaling}</span>
+                        <span class="loot-modifier-tag positive">+${tier * 5}% loot</span>
+                    </div>
+                `;
+
+                card.addEventListener('click', () => {
+                    card.classList.toggle('expanded');
+                });
+
+                roomsGrid.appendChild(card);
+            });
+
+            // Setup filter buttons
+            const filterButtons = document.getElementById('filterButtons');
+            filterButtons.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    filterButtons.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+
+                    const filter = btn.dataset.filter;
+                    roomsGrid.querySelectorAll('.room-card').forEach(card => {
+                        let show = false;
+
+                        if (filter === 'all') {
+                            show = true;
+                        } else if (filter === 'tier-7') {
+                            show = parseInt(card.dataset.tier) >= 7;
+                        } else if (filter === 'tier-6') {
+                            show = parseInt(card.dataset.tier) >= 6;
+                        } else {
+                            show = card.dataset.filter === filter;
+                        }
+
+                        card.style.display = show ? 'block' : 'none';
+                    });
+                });
+            });
+        }
+
+        function renderEvaluation(evaluation) {
+            // Chained Bonuses
+            const chainedSection = document.getElementById('chainedBonusesSection');
+            const chainedList = document.getElementById('chainedBonusesList');
+            if (evaluation.chainedBonuses.length > 0) {
+                chainedSection.style.display = 'block';
+                chainedList.innerHTML = '';
+                evaluation.chainedBonuses.forEach(bonus => {
+                    const li = document.createElement('li');
+                    li.className = 'chain-item';
+                    li.innerHTML = `
+                        <div class="chain-header">
+                            <span class="chain-type">${bonus.description}</span>
+                            <span class="chain-multiplier">${bonus.multiplier.toFixed(2)}x</span>
+                        </div>
+                        <div class="chain-desc">${bonus.rooms.length} rooms connected with ${Math.round((bonus.multiplier - 1) * 100)}% bonus</div>
+                    `;
+                    chainedList.appendChild(li);
+                });
+            } else {
+                chainedSection.style.display = 'none';
+            }
+
+            // Stacked Bonuses
+            const stackedSection = document.getElementById('stackedBonusesSection');
+            const stackedList = document.getElementById('stackedBonusesList');
+            if (evaluation.stackedBonuses.length > 0) {
+                stackedSection.style.display = 'block';
+                stackedList.innerHTML = '';
+                evaluation.stackedBonuses.forEach(bonus => {
+                    const li = document.createElement('li');
+                    li.className = 'stacked-item';
+                    const roomName = bonus.roomType.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                    li.innerHTML = `
+                        <div class="stacked-header">
+                            <span class="stacked-room">${roomName}</span>
+                            <span class="stacked-count">x${bonus.count}</span>
+                        </div>
+                        <div class="stacked-values">
+                            <span>Base: <strong>${bonus.baseValue}</strong></span>
+                            <span>Actual: <strong>${bonus.actualValue}</strong></span>
+                            <span>DR: <strong>${bonus.diminishingReturn}%</strong></span>
+                        </div>
+                    `;
+                    stackedList.appendChild(li);
+                });
+            } else {
+                stackedSection.style.display = 'none';
+            }
+
+            // Monster Scaling
+            const monsterSection = document.getElementById('monsterScalingSection');
+            monsterSection.style.display = 'block';
+            const difficultyClass = 'difficulty-' + evaluation.monsterScaling.difficulty.toLowerCase().replace(' ', '-');
+            document.getElementById('monsterDifficulty').innerHTML = `<span class="difficulty-badge ${difficultyClass}">${evaluation.monsterScaling.difficulty}</span>`;
+            document.getElementById('avgTier').textContent = 'T' + evaluation.monsterScaling.averageTier;
+            document.getElementById('monsterDensityValue').textContent = evaluation.monsterScaling.monsterDensity + '%';
+            document.getElementById('monsterDensityBar').style.width = evaluation.monsterScaling.monsterDensity + '%';
+            document.getElementById('rareChanceValue').textContent = evaluation.monsterScaling.rareMonsterChance + '%';
+            document.getElementById('rareChanceBar').style.width = evaluation.monsterScaling.rareMonsterChance + '%';
+            document.getElementById('bossPresent').textContent = evaluation.monsterScaling.bossPresent ? '✓ Yes' : '✗ No';
+            document.getElementById('bossPresent').className = 'metric-value ' + (evaluation.monsterScaling.bossPresent ? 'red' : 'green');
+
+            // Loot Modifiers
+            const lootSection = document.getElementById('lootModifiersSection');
+            lootSection.style.display = 'block';
+            document.getElementById('currencyMultiplier').textContent = evaluation.lootModifiers.currencyMultiplier + 'x';
+            document.getElementById('rareItemValue').textContent = evaluation.lootModifiers.rareItemChance + '%';
+            document.getElementById('rareItemBar').style.width = evaluation.lootModifiers.rareItemChance + '%';
+            document.getElementById('uniqueItemValue').textContent = evaluation.lootModifiers.uniqueItemChance + '%';
+            document.getElementById('uniqueItemBar').style.width = evaluation.lootModifiers.uniqueItemChance + '%';
+            document.getElementById('corruptionAvailable').textContent = evaluation.lootModifiers.corruptionAvailable ? '✓ Available' : '✗ Not Available';
+            document.getElementById('corruptionAvailable').className = 'metric-value ' + (evaluation.lootModifiers.corruptionAvailable ? 'purple' : 'red');
+            document.getElementById('sacrificeValue').textContent = evaluation.lootModifiers.sacrificeValue;
+
+            // Farming Assessment
+            const farmingSection = document.getElementById('farmingSection');
+            farmingSection.style.display = 'block';
+            const getRatingClass = (rating) => 'rating-' + rating.toLowerCase();
+            document.getElementById('currencyFarming').innerHTML = `<span class="rating-badge ${getRatingClass(evaluation.farmingAssessment.currencyFarming)}">${evaluation.farmingAssessment.currencyFarming}</span>`;
+            document.getElementById('rareMonsterFarming').innerHTML = `<span class="rating-badge ${getRatingClass(evaluation.farmingAssessment.rareMonsterFarming)}">${evaluation.farmingAssessment.rareMonsterFarming}</span>`;
+            document.getElementById('itemFarming').innerHTML = `<span class="rating-badge ${getRatingClass(evaluation.farmingAssessment.itemFarming)}">${evaluation.farmingAssessment.itemFarming}</span>`;
+            document.getElementById('farmingRecommendation').textContent = evaluation.farmingAssessment.overallSuitability;
+
+            // Risk vs Reward
+            const riskSection = document.getElementById('riskRewardSection');
+            riskSection.style.display = 'block';
+            document.getElementById('riskLevel').textContent = evaluation.riskReward.riskLevel;
+            document.getElementById('riskLevel').className = 'risk-reward-value red';
+            document.getElementById('rewardPotential').textContent = evaluation.riskReward.rewardPotential;
+            document.getElementById('rewardPotential').className = 'risk-reward-value green';
+            document.getElementById('timeInvestment').textContent = evaluation.riskReward.timeInvestment;
+            document.getElementById('timeInvestment').className = 'risk-reward-value cyan';
+            document.getElementById('riskRecommendation').textContent = evaluation.riskReward.recommendation;
+        }
+
         function showError(message) {
             const errorEl = document.getElementById('errorMessage');
             errorEl.textContent = message;
             errorEl.classList.add('visible');
         }
-        
+
         function hideError() {
             document.getElementById('errorMessage').classList.remove('visible');
         }
@@ -974,7 +2497,8 @@
                 }
                 
                 const analysis = analyzeTempleData(templeData);
-                
+                const evaluation = evaluateTemple(templeData);
+
                 // Cache DOM elements to minimize queries
                 const elements = {
                     stars: document.getElementById('stars'),
@@ -1047,6 +2571,12 @@
                         }
                         elements.techBadges.appendChild(badge);
                     });
+
+                    // Render evaluation sections
+                    renderEvaluation(evaluation);
+
+                    // Render all rooms with details
+                    renderRooms(templeData.rooms);
                 });
 
                 // Show/hide sections (outside requestAnimationFrame for immediate feedback)
@@ -1070,6 +2600,7 @@
 
             // Expose necessary functions to global scope for event handlers
             window.analyzeTemple = analyzeTemple;
+            window.toggleSection = toggleSection;
 
         })();
     </script>
