@@ -177,13 +177,18 @@ function calculateRoomScore(rewardRooms: Room[]): { score: number; metrics: Room
 
   roomScore += golems * 4; // golems
 
-  // T6 rooms with diminishing returns
-  const t6Score = t6Rooms <= 2 ? t6Rooms * 3 : 6 + (t6Rooms - 2) * 1;
-  roomScore += Math.min(10, t6Score);
+  // T6 rooms with higher value for quantity
+  const t6Score = t6Rooms <= 2 ? t6Rooms * 4 : 8 + (t6Rooms - 2) * 3;
+  roomScore += Math.min(20, t6Score);
 
   // High-tier density bonus
   const highTierCount = rewardRooms.filter((r) => (r.tier || 0) >= 6).length;
   if (highTierCount >= 6) roomScore += 3;
+
+  // Exceptional T6 density bonus (5+ T6 rooms = exceptional quality)
+  if (t6Rooms >= 5) {
+    roomScore += 28; // Massive bonus for 5+ T6 rooms (5★ quality)
+  }
 
   return {
     score: roomScore,
@@ -209,16 +214,16 @@ interface RoomMetrics {
  * Calculate star rating and description
  */
 function calculateStarRating(totalScore: number): { rating: number; description: string } {
-  if (totalScore >= 75) {
+  if (totalScore >= 80) {
     return { rating: 5, description: 'God Tier - Exceptional temple with outstanding quality' };
   }
   if (totalScore >= 55) {
     return { rating: 4, description: 'Excellent - Very strong layout with high-value rooms' };
   }
-  if (totalScore >= 35) {
+  if (totalScore >= 38) {
     return { rating: 3, description: 'Good - Solid optimization with valuable rooms' };
   }
-  if (totalScore >= 25) {
+  if (totalScore >= 35) {
     return { rating: 2, description: 'Average - Basic optimization with some value' };
   }
   return { rating: 1, description: 'Poor - Broken snake chain, no optimization' };
@@ -312,6 +317,9 @@ export function analyzeTemple(templeData: TempleData): TempleAnalysis {
     snakeScore + roomScore + quantityScore + techAnalysis.totalTechScore
   );
 
+  // Recalculate tech analysis with total score for percentage calculation
+  const techAnalysisWithPercentage = analyzeTechPatterns(templeData, totalScore);
+
   // Star rating
   const { rating: starRating, description: ratingDescription } = calculateStarRating(totalScore);
 
@@ -331,16 +339,16 @@ export function analyzeTemple(templeData: TempleData): TempleAnalysis {
     snakeScore,
     roomScore,
     quantityScore,
-    techScore: techAnalysis.totalTechScore,
+    techScore: techAnalysisWithPercentage.totalTechScore,
     totalScore,
     starRating,
     ratingDescription,
     suggestions,
     decodedRooms: templeData.decodedRooms,
-    techBonuses: techAnalysis.bonuses,
-    hasRussianTech: techAnalysis.hasRussianTech,
-    hasRomanRoad: techAnalysis.hasRomanRoad,
-    hasDoubleTriple: techAnalysis.hasDoubleTriple,
+    techBonuses: techAnalysisWithPercentage.bonuses,
+    hasRussianTech: techAnalysisWithPercentage.hasRussianTech,
+    hasRomanRoad: techAnalysisWithPercentage.hasRomanRoad,
+    hasDoubleTriple: techAnalysisWithPercentage.hasDoubleTriple,
   };
 
   // Cache result

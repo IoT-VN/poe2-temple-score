@@ -18,6 +18,7 @@ export interface TechBonus {
   name: string;
   description: string;
   score: number;
+  percentage: number; // Percentage of total score contribution
   detected: boolean;
   rooms?: Room[];
 }
@@ -36,11 +37,7 @@ export interface TechAnalysis {
 /**
  * Find connected rooms starting from a given room using BFS
  */
-function findConnectedRooms(
-  rooms: Room[],
-  startRoom: Room,
-  minTier: number = 0
-): Room[] {
+function findConnectedRooms(rooms: Room[], startRoom: Room, minTier: number = 0): Room[] {
   const visited = new Set<string>();
   const queue: Room[] = [startRoom];
   const connected: Room[] = [];
@@ -89,6 +86,7 @@ function detectRussianTech(rooms: Room[]): TechBonus {
       name: 'Russian Tech',
       description: 'Multiple T7 rooms connected',
       score: 0,
+      percentage: 0,
       detected: false,
     };
   }
@@ -115,6 +113,7 @@ function detectRussianTech(rooms: Room[]): TechBonus {
       name: 'Russian Tech',
       description: `${maxConnected.length} connected T7 rooms`,
       score: TECH_BONUSES.RUSSIAN_TECH,
+      percentage: 0, // Will be calculated after total score is known
       detected: true,
       rooms: maxConnected,
     };
@@ -125,6 +124,7 @@ function detectRussianTech(rooms: Room[]): TechBonus {
     name: 'Russian Tech',
     description: 'Multiple T7 rooms connected',
     score: 0,
+    percentage: 0,
     detected: false,
   };
 }
@@ -144,6 +144,7 @@ function detectRomanRoad(rooms: Room[]): TechBonus {
       name: 'Roman Road',
       description: 'Linear chain of high-tier rooms',
       score: 0,
+      percentage: 0,
       detected: false,
     };
   }
@@ -168,6 +169,7 @@ function detectRomanRoad(rooms: Room[]): TechBonus {
       name: 'Roman Road',
       description: `${maxPathLength} high-tier rooms in a line`,
       score: TECH_BONUSES.ROMAN_ROAD,
+      percentage: 0,
       detected: true,
       rooms: bestPath,
     };
@@ -178,6 +180,7 @@ function detectRomanRoad(rooms: Room[]): TechBonus {
     name: 'Roman Road',
     description: 'Linear chain of high-tier rooms',
     score: 0,
+    percentage: 0,
     detected: false,
   };
 }
@@ -185,12 +188,7 @@ function detectRomanRoad(rooms: Room[]): TechBonus {
 /**
  * Find longest path from room using DFS
  */
-function findLongestPath(
-  rooms: Room[],
-  current: Room,
-  visited: Set<string>,
-  path: Room[]
-): Room[] {
+function findLongestPath(rooms: Room[], current: Room, visited: Set<string>, path: Room[]): Room[] {
   const key = `${current.x},${current.y}`;
   visited.add(key);
   path.push(current);
@@ -231,6 +229,7 @@ function detectDoubleTriple(rooms: Room[]): TechBonus {
       name: 'Double Triple',
       description: 'Two triple connections of T6+ rooms',
       score: 0,
+      percentage: 0,
       detected: false,
     };
   }
@@ -264,6 +263,7 @@ function detectDoubleTriple(rooms: Room[]): TechBonus {
       name: 'Double Triple',
       description: `${validTriples.length} clusters with ${totalRooms} T6+ rooms`,
       score: TECH_BONUSES.DOUBLE_TRIPLE,
+      percentage: 0,
       detected: true,
       rooms: validTriples.flatMap((t) => t),
     };
@@ -274,6 +274,7 @@ function detectDoubleTriple(rooms: Room[]): TechBonus {
     name: 'Double Triple',
     description: 'Two triple connections of T6+ rooms',
     score: 0,
+    percentage: 0,
     detected: false,
   };
 }
@@ -282,16 +283,17 @@ function detectDoubleTriple(rooms: Room[]): TechBonus {
  * Analyze temple for tech patterns and bonuses
  *
  * @param templeData - The temple data to analyze
+ * @param totalScore - Total temple score for percentage calculation
  * @returns Tech analysis with detected bonuses and scores
  *
  * @example
  * ```ts
  * const templeData = { grid: { '0,0': { x: 0, y: 0, room: 'viper_spymaster', tier: 7 } } };
- * const techAnalysis = analyzeTechPatterns(templeData);
+ * const techAnalysis = analyzeTechPatterns(templeData, 100);
  * console.log(techAnalysis.totalTechScore);
  * ```
  */
-export function analyzeTechPatterns(templeData: TempleData): TechAnalysis {
+export function analyzeTechPatterns(templeData: TempleData, totalScore: number = 0): TechAnalysis {
   const rooms = Object.values(templeData.grid || {});
 
   const russianTech = detectRussianTech(rooms);
@@ -300,10 +302,17 @@ export function analyzeTechPatterns(templeData: TempleData): TechAnalysis {
 
   const bonuses: TechBonus[] = [russianTech, romanRoad, doubleTriple];
   const detectedBonuses = bonuses.filter((b) => b.detected);
+  const totalTechScore = detectedBonuses.reduce((sum, b) => sum + b.score, 0);
+
+  // Calculate percentage contribution for each bonus
+  const bonusesWithPercentage = bonuses.map((bonus) => ({
+    ...bonus,
+    percentage: totalScore > 0 ? Math.round((bonus.score / totalScore) * 100) : 0,
+  }));
 
   return {
-    bonuses,
-    totalTechScore: detectedBonuses.reduce((sum, b) => sum + b.score, 0),
+    bonuses: bonusesWithPercentage,
+    totalTechScore,
     hasRussianTech: russianTech.detected,
     hasRomanRoad: romanRoad.detected,
     hasDoubleTriple: doubleTriple.detected,
