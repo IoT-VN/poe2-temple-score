@@ -13,7 +13,12 @@ import { CallToolRequestSchema, ListToolsRequestSchema } from '@modelcontextprot
 
 // Core functionality
 export { decodeTempleData, parseTempleArray } from './core/decoder';
-export { analyzeTemple, filterRewardRooms, countRoomsByTier, clearAnalysisCache } from './core/analyzer';
+export {
+  analyzeTemple,
+  filterRewardRooms,
+  countRoomsByTier,
+  clearAnalysisCache,
+} from './core/analyzer';
 export {
   calculateOverallScore,
   calculateStarRating,
@@ -22,9 +27,19 @@ export {
   generateSuggestions,
 } from './core/scorer';
 export { analyzeTechPatterns } from './core/tech-detector';
+export { evaluateTemple } from './core/temple-evaluation';
 
 // Types
 export type { TempleData, TempleAnalysis, Room, TechBonus } from './types/temple-types';
+export type {
+  TempleEvaluation,
+  ChainedRoomBonus,
+  StackedBonus,
+  MonsterScaling,
+  LootModifiers,
+  FarmingAssessment,
+  RiskRewardAnalysis,
+} from './core/temple-evaluation';
 
 // Utilities
 export { extractShareData, validateShareURL } from './utils/url-parser';
@@ -35,10 +50,26 @@ export * from './config/room-types';
 export * from './config/scoring-config';
 
 // Tools
-import { handler as analyzeTempleUrlHandler, name as analyzeTempleUrlName, inputSchema as analyzeTempleUrlSchema } from './tools/analyze-temple-url';
-import { handler as analyzeTempleDataHandler, name as analyzeTempleDataName, inputSchema as analyzeTempleDataSchema } from './tools/analyze-temple-data';
-import { handler as getRoomInfoHandler, name as getRoomInfoName, inputSchema as getRoomInfoSchema } from './tools/get-room-info';
-import { handler as getRatingCriteriaHandler, name as getRatingCriteriaName, inputSchema as getRatingCriteriaSchema } from './tools/get-rating-criteria';
+import {
+  handler as analyzeTempleUrlHandler,
+  name as analyzeTempleUrlName,
+  inputSchema as analyzeTempleUrlSchema,
+} from './tools/analyze-temple-url';
+import {
+  handler as analyzeTempleDataHandler,
+  name as analyzeTempleDataName,
+  inputSchema as analyzeTempleDataSchema,
+} from './tools/analyze-temple-data';
+import {
+  handler as getRoomInfoHandler,
+  name as getRoomInfoName,
+  inputSchema as getRoomInfoSchema,
+} from './tools/get-room-info';
+import {
+  handler as getRatingCriteriaHandler,
+  name as getRatingCriteriaName,
+  inputSchema as getRatingCriteriaSchema,
+} from './tools/get-rating-criteria';
 
 /**
  * Create MCP Server

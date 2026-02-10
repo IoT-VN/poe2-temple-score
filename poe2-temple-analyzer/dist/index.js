@@ -19,7 +19,7 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.LRUCache = exports.validateShareURL = exports.extractShareData = exports.analyzeTechPatterns = exports.generateSuggestions = exports.calculateDensityScore = exports.calculateRoomValue = exports.calculateStarRating = exports.calculateOverallScore = exports.clearAnalysisCache = exports.countRoomsByTier = exports.filterRewardRooms = exports.analyzeTemple = exports.parseTempleArray = exports.decodeTempleData = void 0;
+exports.LRUCache = exports.validateShareURL = exports.extractShareData = exports.evaluateTemple = exports.analyzeTechPatterns = exports.generateSuggestions = exports.calculateDensityScore = exports.calculateRoomValue = exports.calculateStarRating = exports.calculateOverallScore = exports.clearAnalysisCache = exports.countRoomsByTier = exports.filterRewardRooms = exports.analyzeTemple = exports.parseTempleArray = exports.decodeTempleData = void 0;
 const index_js_1 = require("@modelcontextprotocol/sdk/server/index.js");
 const stdio_js_1 = require("@modelcontextprotocol/sdk/server/stdio.js");
 const types_js_1 = require("@modelcontextprotocol/sdk/types.js");
@@ -42,6 +42,8 @@ Object.defineProperty(exports, "calculateDensityScore", { enumerable: true, get:
 Object.defineProperty(exports, "generateSuggestions", { enumerable: true, get: function () { return scorer_1.generateSuggestions; } });
 var tech_detector_1 = require("./core/tech-detector");
 Object.defineProperty(exports, "analyzeTechPatterns", { enumerable: true, get: function () { return tech_detector_1.analyzeTechPatterns; } });
+var temple_evaluation_1 = require("./core/temple-evaluation");
+Object.defineProperty(exports, "evaluateTemple", { enumerable: true, get: function () { return temple_evaluation_1.evaluateTemple; } });
 // Utilities
 var url_parser_1 = require("./utils/url-parser");
 Object.defineProperty(exports, "extractShareData", { enumerable: true, get: function () { return url_parser_1.extractShareData; } });
