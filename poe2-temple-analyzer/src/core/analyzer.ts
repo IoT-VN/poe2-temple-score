@@ -187,7 +187,7 @@ function calculateRoomScore(rewardRooms: Room[]): { score: number; metrics: Room
 
   // Exceptional T6 density bonus (5+ T6 rooms = exceptional quality)
   if (t6Rooms >= 5) {
-    roomScore += 28; // Massive bonus for 5+ T6 rooms (5★ quality)
+    roomScore += 28; // Massive bonus for 5+ T6 rooms (5★ quality without spymasters)
   }
 
   return {
